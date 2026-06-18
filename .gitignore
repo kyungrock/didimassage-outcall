@@ -16,3 +16,6 @@ venv/
 
 # Logs
 *.log
+
+# Deploy artifacts
+dist/

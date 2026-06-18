@@ -653,7 +653,7 @@ def render_area_page(
   <div class="container">
     <div class="foot-strong">{site["name"]}</div>
     <div>{esc(region_label)} 출장마사지 · {site["phone"]} · 24시간</div>
-    <div class="muted" style="margin-top:8px;">© 2026 didimassage.kr</div>
+    <div class="muted" style="margin-top:8px;">© 2026 {esc(site_host(site))}</div>
   </div>
 </footer>
 <div class="floating-btns">
@@ -722,7 +722,7 @@ def render_metro_hub(site: dict, metro: dict) -> str:
   <div class="container">
     <div class="foot-strong">{site["name"]}</div>
     <div>{esc(label)} · {site["phone"]} · 24시간</div>
-    <div class="muted" style="margin-top:8px;">© 2026 didimassage.kr</div>
+    <div class="muted" style="margin-top:8px;">© 2026 {esc(site_host(site))}</div>
   </div>
 </footer>
 <div class="floating-btns">
@@ -802,7 +802,7 @@ def render_index(site: dict, metros: list) -> str:
   <div class="container">
     <div class="foot-strong">{site["name"]}</div>
     <div>전국 출장마사지 · {site["phone"]} · 24시간</div>
-    <div class="muted" style="margin-top:8px;">© 2026 didimassage.kr</div>
+    <div class="muted" style="margin-top:8px;">© 2026 {esc(site_host(site))}</div>
   </div>
 </footer>
 <div class="floating-btns">
@@ -811,6 +811,169 @@ def render_index(site: dict, metros: list) -> str:
 </div>
 <script src="js/common.js"></script>
 {SHOP_SCRIPTS}
+</body>
+</html>
+"""
+
+
+def site_host(site: dict) -> str:
+    domain = site.get("domain", "https://example.com")
+    return domain.replace("https://", "").replace("http://", "").rstrip("/")
+
+
+def render_shop_detail(site: dict) -> str:
+    domain = site["domain"].rstrip("/")
+    host = site_host(site)
+    tel = site["phoneTel"]
+    name = site["name"]
+    img = domain + site["heroImage"]
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>출장마사지 업체 상세 | {esc(name)}</title>
+  <meta name="description" content="출장마사지 업체 상세 정보, 코스별 가격, 리뷰">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="{domain}/shop-detail.html">
+{og_head_tags(site, f"출장마사지 업체 상세 | {name}", "출장마사지 업체 상세 정보, 코스별 가격, 리뷰", f"{domain}/shop-detail.html")}
+  <script type="application/ld+json">
+  {{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{name}",
+    "url": "{domain}/",
+    "inLanguage": "ko-KR"
+  }}
+  </script>
+  <script type="application/ld+json">
+  {{
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "{name}",
+    "url": "{domain}/shop-detail.html",
+    "telephone": "{schema_telephone(site["phone"])}",
+    "image": "{img}",
+    "priceRange": "₩₩",
+    "areaServed": "전국",
+    "address": {{
+      "@type": "PostalAddress",
+      "addressCountry": "KR"
+    }},
+    "openingHours": "Mo-Su 00:00-23:59"
+  }}
+  </script>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/shop-cards.css">
+  <link rel="stylesheet" href="css/shop-detail.css">
+  <style>.hidden{{display:none!important}}</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div>
+        <div class="brand"><a href="index.html">{esc(name)}</a></div>
+        <div class="sub">출장마사지 업체 상세</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="toggle-btn" onclick="toggleMode()" aria-label="다크/라이트">🌙/☀</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="shopDetailRoot">
+  <section class="shop-detail-hero">
+    <img id="shopHeroImage" src="{site["heroImage"]}" alt="업체 이미지" width="1200" height="420" loading="eager">
+    <span class="shop-card-badge">출장마사지</span>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="card">
+        <div class="shop-detail-header">
+          <h1 class="shop-detail-name" id="shopName">업체명</h1>
+          <div class="shop-detail-district" id="shopDistrict">지역</div>
+          <div class="shop-detail-rating">
+            <span class="shop-detail-stars" id="shopStars">★★★★★</span>
+            <span id="shopRatingText">4.9</span>
+          </div>
+        </div>
+        <p id="shopDescription"></p>
+
+        <div class="shop-info-grid">
+          <div class="shop-info-item">
+            <span class="shop-info-label">주소</span>
+            <span class="shop-info-value" id="shopAddress">-</span>
+            <span class="shop-info-value muted" id="shopDetailAddress"></span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">전화</span>
+            <span class="shop-info-value" id="shopPhone">-</span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">운영시간</span>
+            <span class="shop-info-value" id="shopHours">-</span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">최저가</span>
+            <span class="shop-info-value" id="shopPrice">-</span>
+          </div>
+        </div>
+
+        <div class="shop-detail-cta">
+          <a id="shopCallBtn" class="btn-call" href="tel:{tel}">전화 상담</a>
+          <a id="shopBackBtn" class="btn-back" href="index.html">← 목록으로</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>코스별 가격</h2>
+      <div class="card" id="shopCourses"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>특징</h2>
+      <div class="card">
+        <div class="feature-tags" id="shopFeatures"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>관리사 안내</h2>
+      <div class="card">
+        <p class="staff-info" id="shopStaff"></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>리뷰</h2>
+      <div class="card" id="shopReviews"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-strong">{esc(name)}</div>
+    <div class="muted" style="margin-top:8px;">© 2026 {esc(host)}</div>
+  </div>
+</footer>
+
+<script src="js/shop-card-data-outcall.js"></script>
+<script src="js/shops-outcall-detail.js"></script>
+<script src="js/common.js"></script>
+<script src="js/shop-detail.js"></script>
 </body>
 </html>
 """
@@ -872,6 +1035,11 @@ def main():
 
     (OUT_DIR / "index.html").write_text(
         render_index(site, data["metros"]), encoding="utf-8"
+    )
+    count += 1
+
+    (OUT_DIR / "shop-detail.html").write_text(
+        render_shop_detail(site), encoding="utf-8"
     )
     count += 1
 

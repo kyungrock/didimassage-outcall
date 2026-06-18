@@ -1,0 +1,21 @@
+# 닷홈(Dothome) — healingoutcallmassage.com + didimassage.kr 통합
+RewriteEngine On
+
+# 구 도메인 didimassage.kr → 신규 메인 도메인 (301)
+RewriteCond %{HTTP_HOST} ^(www\.)?didimassage\.kr$ [NC]
+RewriteRule ^ https://healingoutcallmassage.com%{REQUEST_URI} [R=301,L]
+
+# www 서브도메인 제거
+RewriteCond %{HTTP_HOST} ^www\.healingoutcallmassage\.com$ [NC]
+RewriteRule ^ https://healingoutcallmassage.com%{REQUEST_URI} [R=301,L]
+
+DirectoryIndex index.html
+Options -Indexes
+
+# 정적 HTML 확장자 없이 접근 시 .html 자동 매칭 (닷홈 Apache)
+<IfModule mod_rewrite.c>
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+)$ $1.html [L]
+</IfModule>

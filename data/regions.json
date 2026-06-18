@@ -1,7 +1,11 @@
 {
   "site": {
     "name": "20대, 30대 힐링 출장마사지",
-    "domain": "https://didimassage.kr",
+    "domain": "https://healingoutcallmassage.com",
+    "legacyDomains": [
+      "https://didimassage.kr",
+      "https://www.didimassage.kr"
+    ],
     "phone": "0507-1859-6297",
     "phoneTel": "050718596297",
     "kakao": "https://open.kakao.com/o/g3bQO6zi",
