@@ -1,0 +1,216 @@
+.shop-detail-hero {
+  position: relative;
+  max-height: 420px;
+  overflow: hidden;
+}
+
+.shop-detail-hero img {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  display: block;
+}
+
+.shop-detail-hero .shop-card-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+.shop-detail-header {
+  margin-bottom: 8px;
+}
+
+.shop-detail-name {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.shop-detail-district {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.shop-detail-rating {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-detail-stars {
+  color: #ffb020;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.shop-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.shop-info-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.light-mode .shop-info-item {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.shop-info-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  font-weight: 800;
+}
+
+.shop-info-value {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.shop-info-value a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.course-category {
+  margin-bottom: 20px;
+}
+
+.course-category-title {
+  font-size: 17px;
+  font-weight: 950;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+.course-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.course-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.course-item-name {
+  font-weight: 900;
+}
+
+.course-item-duration {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.course-item-price {
+  color: var(--brand);
+  font-weight: 950;
+}
+
+.course-item-desc {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.review-item {
+  border-bottom: 1px solid var(--border);
+  padding: 14px 0;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.review-author {
+  font-weight: 900;
+}
+
+.review-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.review-stars {
+  color: #ffb020;
+  font-size: 13px;
+}
+
+.review-text {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.feature-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feature-tag {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 173, 239, 0.1);
+  border: 1px solid rgba(0, 173, 239, 0.25);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.shop-detail-cta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.shop-detail-cta a {
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.shop-detail-cta .btn-call {
+  background: var(--brand);
+  color: #fff;
+}
+
+.shop-detail-cta .btn-back {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.staff-info {
+  line-height: 1.75;
+  color: var(--muted);
+}

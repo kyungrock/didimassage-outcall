@@ -1,0 +1,201 @@
+{
+  "site": {
+    "name": "20대, 30대 힐링 출장마사지",
+    "domain": "https://didimassage.kr",
+    "phone": "0507-1859-6297",
+    "phoneTel": "050718596297",
+    "kakao": "https://open.kakao.com/o/g3bQO6zi",
+    "heroImage": "/img/model-1.png",
+    "kakaoIcon": "/img/kakao-icon.png"
+  },
+  "pricing": {
+    "A": {
+      "name": "건식 마사지",
+      "rows": [
+        ["60분", "70,000원"],
+        ["90분", "80,000원"],
+        ["120분", "100,000원"]
+      ]
+    },
+    "B": {
+      "name": "힐링(스웨디시) 관리",
+      "rows": [
+        ["60분", "90,000원"],
+        ["90분", "110,000원"],
+        ["120분", "130,000원"],
+        ["150분", "150,000원"]
+      ]
+    },
+    "C": {
+      "name": "프리미엄 관리",
+      "rows": [
+        ["60분", "100,000원"],
+        ["90분", "130,000원"],
+        ["120분", "150,000원"],
+        ["150분", "180,000원"]
+      ]
+    }
+  },
+  "metros": [
+    {
+      "id": "seoul",
+      "name": "서울",
+      "type": "특별시",
+      "mapQuery": "서울특별시",
+      "areas": [
+        {"slug": "seoul-gangnam", "name": "강남구", "short": "강남", "dong": ["역삼", "삼성", "청담", "논현", "신사", "대치"]},
+        {"slug": "seoul-gangdong", "name": "강동구", "short": "강동", "dong": ["천호", "길동", "둔촌", "암사"]},
+        {"slug": "seoul-gangbuk", "name": "강북구", "short": "강북", "dong": ["미아", "수유", "번동"]},
+        {"slug": "seoul-gangseo", "name": "강서구", "short": "강서", "dong": ["화곡", "등촌", "마곡", "공항동"]},
+        {"slug": "seoul-gwanak", "name": "관악구", "short": "관악", "dong": ["신림", "봉천", "서원"]},
+        {"slug": "seoul-gwangjin", "name": "광진구", "short": "광진", "dong": ["건대", "구의", "자양", "화양"]},
+        {"slug": "seoul-guro", "name": "구로구", "short": "구로", "dong": ["구로", "신도림", "가리봉"]},
+        {"slug": "seoul-geumcheon", "name": "금천구", "short": "금천", "dong": ["가산", "독산", "시흥"]},
+        {"slug": "seoul-nowon", "name": "노원구", "short": "노원", "dong": ["상계", "중계", "하계", "공릉"]},
+        {"slug": "seoul-dobong", "name": "도봉구", "short": "도봉", "dong": ["창동", "방학", "쌍문"]},
+        {"slug": "seoul-dongdaemun", "name": "동대문구", "short": "동대문", "dong": ["청량리", "회기", "용두", "이문"]},
+        {"slug": "seoul-dongjak", "name": "동작구", "short": "동작", "dong": ["노량진", "사당", "흑석", "상도"]},
+        {"slug": "seoul-mapo", "name": "마포구", "short": "마포", "dong": ["홍대", "합정", "연남", "공덕", "망원"]},
+        {"slug": "seoul-seodaemun", "name": "서대문구", "short": "서대문", "dong": ["신촌", "연희", "북가좌", "남가좌"]},
+        {"slug": "seoul-seocho", "name": "서초구", "short": "서초", "dong": ["서초", "방배", "잠원", "양재"]},
+        {"slug": "seoul-seongdong", "name": "성동구", "short": "성동", "dong": ["성수", "왕십리", "금호", "옥수"]},
+        {"slug": "seoul-seongbuk", "name": "성북구", "short": "성북", "dong": ["정릉", "길음", "돈암", "안암"]},
+        {"slug": "seoul-songpa", "name": "송파구", "short": "송파", "dong": ["잠실", "문정", "방이", "석촌", "가락"]},
+        {"slug": "seoul-yangcheon", "name": "양천구", "short": "양천", "dong": ["목동", "신정", "신월"]},
+        {"slug": "seoul-yeongdeungpo", "name": "영등포구", "short": "영등포", "dong": ["여의도", "당산", "문래", "대림"]},
+        {"slug": "seoul-yongsan", "name": "용산구", "short": "용산", "dong": ["이태원", "한남", "용산", "청파"]},
+        {"slug": "seoul-eunpyeong", "name": "은평구", "short": "은평", "dong": ["불광", "응암", "역촌", "갈현"]},
+        {"slug": "seoul-jongno", "name": "종로구", "short": "종로", "dong": ["종로", "혜화", "명륜", "평창"]},
+        {"slug": "seoul-jung", "name": "중구", "short": "중구", "dong": ["명동", "을지로", "회현", "충무로"]},
+        {"slug": "seoul-jungnang", "name": "중랑구", "short": "중랑", "dong": ["면목", "상봉", "중화", "망우"]}
+      ]
+    },
+    {
+      "id": "gyeonggi",
+      "name": "경기",
+      "type": "도",
+      "mapQuery": "경기도",
+      "areas": [
+        {"slug": "gyeonggi-suwon", "name": "수원시", "short": "수원", "dong": ["영통", "장안", "권선", "팔달", "인계", "매탄"]},
+        {"slug": "gyeonggi-seongnam", "name": "성남시", "short": "성남", "dong": ["분당", "판교", "정자", "수정", "중원"]},
+        {"slug": "gyeonggi-goyang", "name": "고양시", "short": "고양", "dong": ["일산", "킨텍스", "화정", "행신", "덕양"]},
+        {"slug": "gyeonggi-yongin", "name": "용인시", "short": "용인", "dong": ["기흥", "수지", "죽전", "동백", "처인"]},
+        {"slug": "gyeonggi-bucheon", "name": "부천시", "short": "부천", "dong": ["중동", "상동", "송내", "역곡", "원미"]},
+        {"slug": "gyeonggi-ansan", "name": "안산시", "short": "안산", "dong": ["단원", "상록", "고잔", "선부"]},
+        {"slug": "gyeonggi-anyang", "name": "안양시", "short": "안양", "dong": ["평촌", "범계", "관양", "동안", "만안"]},
+        {"slug": "gyeonggi-namyangju", "name": "남양주시", "short": "남양주", "dong": ["다산", "별내", "화도", "진접", "와부"]},
+        {"slug": "gyeonggi-hwaseong", "name": "화성시", "short": "화성", "dong": ["동탄", "병점", "향남", "봉담", "정남"]},
+        {"slug": "gyeonggi-pyeongtaek", "name": "평택시", "short": "평택", "dong": ["송탄", "비전", "고덕", "안중", "서정"]},
+        {"slug": "gyeonggi-uijeongbu", "name": "의정부시", "short": "의정부", "dong": ["가능", "민락", "호원", "신곡", "금오"]},
+        {"slug": "gyeonggi-siheung", "name": "시흥시", "short": "시흥", "dong": ["정왕", "배곧", "은행", "신천", "월곶"]},
+        {"slug": "gyeonggi-paju", "name": "파주시", "short": "파주", "dong": ["운정", "금촌", "교하", "문산", "야당", "탄현"], "subLinks": [
+          {"href": "gyeonggi-paju-unjeong.html", "label": "운정 출장마사지"},
+          {"href": "gyeonggi-paju-geumchon.html", "label": "금촌 출장마사지"},
+          {"href": "gyeonggi-paju-gyoha.html", "label": "교하 출장마사지"},
+          {"href": "gyeonggi-paju-munsan.html", "label": "문산 출장마사지"}
+        ]},
+        {"slug": "gyeonggi-gimpo", "name": "김포시", "short": "김포", "dong": ["구래", "장기", "풍무동", "사우", "양촌"]},
+        {"slug": "gyeonggi-gwangmyeong", "name": "광명시", "short": "광명", "dong": ["철산", "하안", "소하", "광명역"]},
+        {"slug": "gyeonggi-gwangju-si", "name": "광주시", "short": "광주", "dong": ["경안", "초월", "곤지암", "오포", "퇴촌"]},
+        {"slug": "gyeonggi-hanam", "name": "하남시", "short": "하남", "dong": ["미사", "감일", "덕풍", "위례", "신장"]},
+        {"slug": "gyeonggi-osan", "name": "오산시", "short": "오산", "dong": ["오산", "세마", "궐동", "가장"]},
+        {"slug": "gyeonggi-icheon", "name": "이천시", "short": "이천", "dong": ["이천", "마장", "부발", "신둔"]},
+        {"slug": "gyeonggi-guri", "name": "구리시", "short": "구리", "dong": ["갈매", "인창", "수택", "교문"]}
+      ]
+    },
+    {
+      "id": "incheon",
+      "name": "인천",
+      "type": "광역시",
+      "mapQuery": "인천광역시",
+      "areas": [
+        {"slug": "incheon-namdong", "name": "남동구", "short": "남동", "dong": ["구월", "간석", "논현", "서창"]},
+        {"slug": "incheon-bupyeong", "name": "부평구", "short": "부평", "dong": ["부평", "산곡", "청천", "갈산"]},
+        {"slug": "incheon-yeonsu", "name": "연수구", "short": "연수", "dong": ["송도", "연수", "옥련", "동춘"]},
+        {"slug": "incheon-seogu", "name": "서구", "short": "서구", "dong": ["검단", "청라", "가정", "루원"]},
+        {"slug": "incheon-jung", "name": "중구", "short": "중구", "dong": ["운서", "영종", "신포", "차이나타운"]},
+        {"slug": "incheon-gyeyang", "name": "계양구", "short": "계양", "dong": ["계산", "작전", "효성", "임학"]},
+        {"slug": "incheon-michuhol", "name": "미추홀구", "short": "미추홀", "dong": ["주안", "숭의", "용현", "학익"]}
+      ]
+    },
+    {
+      "id": "busan",
+      "name": "부산",
+      "type": "광역시",
+      "mapQuery": "부산광역시",
+      "areas": [
+        {"slug": "busan-haeundae", "name": "해운대구", "short": "해운대", "dong": ["해운대", "센텀", "재송", "우동"]},
+        {"slug": "busan-suyeong", "name": "수영구", "short": "수영", "dong": ["광안", "민락", "수영", "망미"]},
+        {"slug": "busan-busanjin", "name": "부산진구", "short": "부산진", "dong": ["서면", "범천", "전포", "양정"]},
+        {"slug": "busan-dongnae", "name": "동래구", "short": "동래", "dong": ["온천", "명륜", "사직", "안락"]},
+        {"slug": "busan-nam", "name": "남구", "short": "남구", "dong": ["대연", "용호", "문현", "감만"]},
+        {"slug": "busan-sasang", "name": "사상구", "short": "사상", "dong": ["괘법", "덕포", "주례", "엄궁"]},
+        {"slug": "busan-buk", "name": "북구", "short": "북구", "dong": ["화명", "금곡", "구포", "덕천"]}
+      ]
+    },
+    {
+      "id": "daegu",
+      "name": "대구",
+      "type": "광역시",
+      "mapQuery": "대구광역시",
+      "areas": [
+        {"slug": "daegu-suseong", "name": "수성구", "short": "수성", "dong": ["범어", "만촌", "황금", "두산"]},
+        {"slug": "daegu-dalseo", "name": "달서구", "short": "달서", "dong": ["성당", "월성", "상인", "죽전"]},
+        {"slug": "daegu-jung", "name": "중구", "short": "중구", "dong": ["동성로", "삼덕", "대신", "남산"]},
+        {"slug": "daegu-dong", "name": "동구", "short": "동구", "dong": ["신암", "효목", "방촌", "불로"]},
+        {"slug": "daegu-nam", "name": "남구", "short": "남구", "dong": ["대명", "봉덕", "이천", "앞산"]}
+      ]
+    },
+    {
+      "id": "daejeon",
+      "name": "대전",
+      "type": "광역시",
+      "mapQuery": "대전광역시",
+      "areas": [
+        {"slug": "daejeon-yuseong", "name": "유성구", "short": "유성", "dong": ["봉명", "관평", "구암", "노은"]},
+        {"slug": "daejeon-seo", "name": "서구", "short": "서구", "dong": ["둔산", "월평", "관저", "갈마"]},
+        {"slug": "daejeon-dong", "name": "동구", "short": "동구", "dong": ["대동", "용전", "판암", "신흥"]},
+        {"slug": "daejeon-jung", "name": "중구", "short": "중구", "dong": ["은행", "대흥", "문화", "유천"]}
+      ]
+    },
+    {
+      "id": "gwangju",
+      "name": "광주",
+      "type": "광역시",
+      "mapQuery": "광주광역시",
+      "areas": [
+        {"slug": "gwangju-seo", "name": "서구", "short": "서구", "dong": ["치평", "금호", "상무", "화정"]},
+        {"slug": "gwangju-nam", "name": "남구", "short": "남구", "dong": ["봉선", "주월", "양림", "송암"]},
+        {"slug": "gwangju-buk", "name": "북구", "short": "북구", "dong": ["운암", "일곡", "두암", "문흥"]},
+        {"slug": "gwangju-dong", "name": "동구", "short": "동구", "dong": ["충장", "계림", "지산", "소태"]}
+      ]
+    },
+    {
+      "id": "jeju",
+      "name": "제주",
+      "type": "특별자치도",
+      "mapQuery": "제주특별자치도",
+      "areas": [
+        {"slug": "jeju-si", "name": "제주시", "short": "제주시", "dong": ["연동", "노형", "이도", "삼도", "오라", "애월"]},
+        {"slug": "jeju-seogwipo", "name": "서귀포시", "short": "서귀포", "dong": ["중문", "대정", "남원", "표선", "성산", "서귀"]}
+      ]
+    },
+    {
+      "id": "ulsan",
+      "name": "울산",
+      "type": "광역시",
+      "mapQuery": "울산광역시",
+      "areas": [
+        {"slug": "ulsan-nam", "name": "남구", "short": "남구", "dong": ["삼산", "달동", "무거", "옥동"]},
+        {"slug": "ulsan-jung", "name": "중구", "short": "중구", "dong": ["성남", "학성", "우정", "태화"]},
+        {"slug": "ulsan-buk", "name": "북구", "short": "북구", "dong": ["양정", "송정", "효문", "농소"]}
+      ]
+    }
+  ],
+  "pajuSubs": [
+    {"slug": "gyeonggi-paju-unjeong", "name": "운정", "parent": "gyeonggi-paju", "parentName": "파주시"},
+    {"slug": "gyeonggi-paju-geumchon", "name": "금촌", "parent": "gyeonggi-paju", "parentName": "파주시"},
+    {"slug": "gyeonggi-paju-gyoha", "name": "교하", "parent": "gyeonggi-paju", "parentName": "파주시"},
+    {"slug": "gyeonggi-paju-munsan", "name": "문산", "parent": "gyeonggi-paju", "parentName": "파주시"}
+  ]
+}
