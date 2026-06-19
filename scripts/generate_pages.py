@@ -122,6 +122,35 @@ def metro_admin_label(metro: dict) -> str:
     return name
 
 
+def build_duplicate_shorts(metros: list) -> set[str]:
+    """전국에서 short 이름이 겹치는 구·시 (중구, 서구 등)"""
+    from collections import Counter
+
+    counts: Counter[str] = Counter()
+    for metro in metros:
+        for area in metro["areas"]:
+            counts[area.get("short", area["name"])] += 1
+    return {short for short, count in counts.items() if count > 1}
+
+
+def area_title_label(metro_name: str, short: str, dup_shorts: set[str]) -> str:
+    """페이지 title용: 강남 / 서울 중구 (short 중복 시 지역 접두)"""
+    if short in dup_shorts:
+        return f"{metro_name} {short}"
+    return short
+
+
+def metro_page_title(metro_name: str, site_name: str) -> str:
+    return f"{metro_name} 출장마사지｜시·구 전지역 24시 - {site_name}"
+
+
+def area_page_title(
+    metro_name: str, short: str, dup_shorts: set[str], site_name: str
+) -> str:
+    label = area_title_label(metro_name, short, dup_shorts)
+    return f"{label} 출장마사지｜24시 후불 - {site_name}"
+
+
 def schema_telephone(phone: str) -> str:
     if phone.startswith("0"):
         return "+82-" + phone[1:]
@@ -488,6 +517,7 @@ def render_area_page(
     area: dict,
     area_index: dict,
     coords: dict,
+    dup_shorts: set[str],
     *,
     is_sub: bool = False,
     parent_area: dict | None = None,
@@ -497,7 +527,7 @@ def render_area_page(
     metro_name = metro["name"]
     dong_list = "·".join(area.get("dong", [])[:6])
     region_label = f"{metro_name} {short}"
-    page_title = f"{region_label} 출장마사지｜24시 후불 - {site['name']}"
+    page_title = area_page_title(metro_name, short, dup_shorts, site["name"])
     h1 = f"{region_label} 출장마사지 24시간 후불"
     canonical = f"{site['domain']}/{slug}.html"
     map_query = f"{metro_name} {area['name']}"
@@ -669,9 +699,10 @@ def render_area_page(
 
 def render_metro_hub(site: dict, metro: dict) -> str:
     label = metro_admin_label(metro)
+    metro_name = metro["name"]
     canonical = f"{site['domain']}/{metro['id']}.html"
-    page_title = f"{label}｜시·구 전지역 24시 - {site['name']}"
-    meta_desc = f"{label}. {len(metro['areas'])}개 지역 전지역 방문, 24시간 후불제."
+    page_title = metro_page_title(metro_name, site["name"])
+    meta_desc = f"{metro_name} 출장마사지. {len(metro['areas'])}개 지역 전지역 방문, 24시간 후불제."
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -686,7 +717,7 @@ def render_metro_hub(site: dict, metro: dict) -> str:
   <link rel="stylesheet" href="css/common.css">
   {SHOP_CSS}
   {REGION_CSS}
-{seo_schema_block(site, canonical=canonical, region_label=label, page_region=metro["name"], item_list_name=f"{label} 출장마사지 업체", local_desc=meta_desc)}
+{seo_schema_block(site, canonical=canonical, region_label=f"{metro_name} 출장마사지", page_region=metro["name"], item_list_name=f"{metro_name} 출장마사지 업체", local_desc=meta_desc)}
 </head>
 <body>
 {site_top_open()}
@@ -985,6 +1016,7 @@ def main():
     area_index = build_area_index(data)
     site = data["site"]
     pricing = data["pricing"]
+    dup_shorts = build_duplicate_shorts(data["metros"])
     count = 0
 
     for metro in data["metros"]:
@@ -996,7 +1028,7 @@ def main():
         for area in metro["areas"]:
             (OUT_DIR / f"{area['slug']}.html").write_text(
                 render_area_page(
-                    site, pricing, metro, area, area_index, coords
+                    site, pricing, metro, area, area_index, coords, dup_shorts
                 ),
                 encoding="utf-8",
             )
@@ -1026,6 +1058,7 @@ def main():
                 area,
                 area_index,
                 coords,
+                dup_shorts,
                 is_sub=True,
                 parent_area=paju_parent,
             ),
