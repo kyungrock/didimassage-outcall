@@ -159,6 +159,16 @@
   color: var(--accent);
 }
 
+.blog-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.blog-content a:hover {
+  opacity: 0.85;
+}
+
 .blog-related {
   margin-top: 28px;
   padding: 20px;
@@ -259,6 +269,51 @@
 .blog-toolbar button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.blog-link-box {
+  margin: 10px 0 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.blog-link-box label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 8px 0 4px;
+}
+
+.blog-link-box input[type="url"],
+.blog-link-box input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.blog-link-check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+}
+
+.blog-link-box .blog-btn-secondary {
+  margin-top: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .blog-form-actions {
