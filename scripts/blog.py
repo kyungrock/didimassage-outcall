@@ -77,6 +77,54 @@ def format_date_kr(d: str) -> str:
     return f"{y}년 {int(m)}월 {int(day)}일"
 
 
+def markdown_to_html(text: str) -> str:
+    """간단한 마크다운 → HTML (글쓰기 페이지에서 #, ##, * 목록 사용 시)"""
+    lines = (text or "").replace("\r\n", "\n").split("\n")
+    parts: list[str] = []
+    in_ul = False
+
+    def close_ul() -> None:
+        nonlocal in_ul
+        if in_ul:
+            parts.append("</ul>")
+            in_ul = False
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            close_ul()
+            continue
+        if stripped.startswith("### "):
+            close_ul()
+            parts.append(f"<h3>{esc(stripped[4:])}</h3>")
+        elif stripped.startswith("## "):
+            close_ul()
+            parts.append(f"<h2>{esc(stripped[3:])}</h2>")
+        elif stripped.startswith("# "):
+            close_ul()
+            parts.append(f"<h2>{esc(stripped[2:])}</h2>")
+        elif stripped.startswith("* "):
+            if not in_ul:
+                parts.append("<ul>")
+                in_ul = True
+            parts.append(f"<li>{esc(stripped[2:])}</li>")
+        else:
+            close_ul()
+            parts.append(f"<p>{esc(stripped)}</p>")
+
+    close_ul()
+    return "\n".join(parts)
+
+
+def normalize_content(content: str) -> str:
+    c = (content or "").strip()
+    if not c:
+        return ""
+    if c.startswith("<"):
+        return c
+    return markdown_to_html(c)
+
+
 def blog_header(site: dict, *, sub: str, depth: int = 0) -> str:
     prefix = "../" * depth
     return f"""<header>
@@ -277,7 +325,7 @@ def render_blog_post(site: dict, post: dict, all_posts: list[dict]) -> str:
     </header>
     <img class="blog-article-image" src="{esc(hero_img)}" alt="{esc(title)}" loading="eager" decoding="async">
     <div class="blog-content card">
-      {post.get("content", "")}
+      {normalize_content(post.get("content", ""))}
     </div>
     {related}
     <div class="blog-cta card">
@@ -341,6 +389,8 @@ def merge_draft(draft_path: Path) -> dict:
             p["date"] = date.today().isoformat()
         p.setdefault("published", True)
         p.setdefault("author", "힐링 출장마사지")
+        if p.get("content") and not str(p["content"]).strip().startswith("<"):
+            p["content"] = normalize_content(p["content"])
         if p["id"] in by_id:
             posts[by_id[p["id"]]] = p
             updated += 1

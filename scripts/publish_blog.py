@@ -13,6 +13,26 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from blog import merge_draft, write_blog_pages  # noqa: E402
+
+
+def resolve_draft_path(arg: str) -> Path:
+    """blog-draft.json 위치 자동 탐색 (프로젝트 폴더 → 다운로드 폴더)"""
+    candidates = [
+        Path(arg),
+        ROOT / arg,
+        Path.home() / "Downloads" / Path(arg).name,
+    ]
+    for p in candidates:
+        if p.is_file():
+            return p.resolve()
+    tried = "\n  ".join(str(c) for c in candidates)
+    raise FileNotFoundError(
+        f"파일을 찾을 수 없습니다: {arg}\n"
+        f"시도한 경로:\n  {tried}\n\n"
+        f"글쓰기 페이지에서 '게시 파일 저장' 후\n"
+        f"  {ROOT / 'blog-draft.json'}\n"
+        f"또는 다운로드 폴더에 저장되어도 됩니다."
+    )
 from generate_pages import OUT_DIR, load_data  # noqa: E402
 from seo_meta import write_robots, write_sitemap  # noqa: E402
 
@@ -32,7 +52,9 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.add:
-        result = merge_draft(Path(args.add))
+        draft_path = resolve_draft_path(args.add)
+        print(f"파일 사용: {draft_path}")
+        result = merge_draft(draft_path)
         print(
             f"병합 완료: 추가 {result['added']}건, 수정 {result['updated']}건, "
             f"총 {result['total']}건"

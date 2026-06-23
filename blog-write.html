@@ -90,11 +90,12 @@
     <div class="card blog-help">
       <h3>📤 게시 방법 (3단계)</h3>
       <ol>
-        <li>위에서 글 작성 → <strong>게시 파일 저장</strong> 클릭 → <code>blog-draft.json</code> 다운로드</li>
+        <li>위에서 글 작성 → <strong>게시 파일 저장</strong> 클릭 → <code>blog-draft.json</code> 다운로드 (다운로드 폴더에 저장돼도 됩니다)</li>
         <li>PowerShell에서 프로젝트 폴더로 이동 후 실행:
           <pre style="overflow:auto;background:var(--card);padding:12px;border-radius:8px;margin:8px 0;">cd "D:\경락\커서\site setting\outcallsite\1"
 python scripts/publish_blog.py --add blog-draft.json
 python scripts/generate_pages.py</pre>
+          <span class="muted">※ 파일이 다운로드 폴더에만 있어도 자동으로 찾습니다.</span>
         </li>
         <li>GitHub에 올리기:
           <pre style="overflow:auto;background:var(--card);padding:12px;border-radius:8px;margin:8px 0;">git add data/blog-posts.json blog.html blog/ css/blog.css sitemap.xml
