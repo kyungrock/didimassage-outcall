@@ -1,0 +1,361 @@
+/* 출장마사지 블로그 */
+
+.blog-hero {
+  padding: 48px 0 24px;
+  text-align: center;
+}
+
+.blog-hero h1 {
+  font-size: clamp(26px, 4vw, 36px);
+  margin-bottom: 10px;
+}
+
+.blog-write-btn {
+  display: inline-block;
+  margin-top: 16px;
+  text-decoration: none;
+}
+
+.blog-list-section {
+  padding: 20px 0 56px;
+}
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 22px;
+}
+
+.blog-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.blog-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.blog-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.blog-card-image-wrap {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #222;
+}
+
+.blog-card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-card-body {
+  padding: 18px;
+}
+
+.blog-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.blog-card-title {
+  font-size: 18px;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.blog-card-summary {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.blog-tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.blog-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+}
+
+/* 글 상세 */
+.blog-article {
+  padding: 32px 0 56px;
+}
+
+.blog-breadcrumb {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.blog-breadcrumb a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.blog-article-header time {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.blog-article-header h1 {
+  font-size: clamp(24px, 4vw, 34px);
+  margin: 10px 0 14px;
+  line-height: 1.35;
+}
+
+.blog-author {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.blog-article-image {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin: 20px 0;
+}
+
+.blog-content {
+  padding: 28px;
+  line-height: 1.85;
+  font-size: 16px;
+}
+
+.blog-content h2 {
+  font-size: 22px;
+  margin: 28px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.blog-content h3 {
+  font-size: 18px;
+  margin: 22px 0 10px;
+}
+
+.blog-content p {
+  margin: 0 0 14px;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+
+.blog-content li {
+  margin-bottom: 6px;
+}
+
+.blog-content strong {
+  color: var(--accent);
+}
+
+.blog-related {
+  margin-top: 28px;
+  padding: 20px;
+}
+
+.blog-related-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.blog-related-list a {
+  color: var(--accent);
+}
+
+.blog-cta {
+  margin-top: 28px;
+  padding: 24px;
+  text-align: center;
+}
+
+.blog-cta-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.blog-back {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* 글쓰기 페이지 */
+.blog-write-page {
+  padding: 32px 0 56px;
+}
+
+.blog-write-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .blog-write-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blog-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 14px 0 6px;
+}
+
+.blog-form input,
+.blog-form textarea,
+.blog-form select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.blog-form textarea {
+  min-height: 280px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.blog-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.blog-toolbar button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.blog-toolbar button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.blog-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.blog-form-actions button,
+.blog-form-actions a {
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.blog-btn-primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+.blog-btn-secondary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.blog-btn-outline {
+  background: transparent;
+  border: 1px solid var(--border) !important;
+  color: var(--text);
+}
+
+.blog-preview {
+  padding: 24px;
+  min-height: 400px;
+}
+
+.blog-preview .blog-content {
+  padding: 0;
+}
+
+.blog-help {
+  margin-top: 24px;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.blog-help code {
+  background: var(--card);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.blog-status {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  display: none;
+}
+
+.blog-status.show {
+  display: block;
+}
+
+.blog-status.ok {
+  background: rgba(0, 173, 239, 0.15);
+  border: 1px solid var(--accent);
+}
+
+.blog-status.err {
+  background: rgba(232, 58, 58, 0.15);
+  border: 1px solid var(--brand);
+}

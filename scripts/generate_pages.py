@@ -17,6 +17,7 @@ import sys
 sys.path.insert(0, str(ROOT / "scripts"))
 from shop_card_prerender import render_shop_cards_grid  # noqa: E402
 from area_content import AreaContent, course_heading, get_area_content, why_bodies  # noqa: E402
+from blog import write_blog_pages  # noqa: E402
 from seo_meta import (  # noqa: E402
     head_json_ld_block,
     json_ld_breadcrumb,
@@ -819,6 +820,16 @@ def render_index(site: dict, metros: list) -> str:
   </div>
 </section>
 {shop_section_html("전국", "", "", "", "")}
+<section id="blog-link">
+  <div class="container">
+    <h2>📝 출장마사지 블로그</h2>
+    <div class="card">
+      <p>마사지 이용 가이드, 코스 비교, 예약 팁 등 유용한 정보를 블로그에서 확인하세요.</p>
+      <p style="margin-top:12px;"><a href="blog.html" class="cta-btn" style="display:inline-block;text-decoration:none;">블로그 보기</a>
+      <a href="blog-write.html" style="margin-left:10px;color:var(--accent);font-weight:700;">글 작성</a></p>
+    </div>
+  </div>
+</section>
 <section id="contact">
   <div class="container">
     <h2>📞 지금 바로 상담</h2>
@@ -1078,10 +1089,14 @@ def main():
 
     write_regions_data_js(data["metros"], data.get("pajuSubs", []))
 
+    blog_count = write_blog_pages(OUT_DIR, site)
+    count += blog_count
+
     write_sitemap(OUT_DIR, site["domain"], data["metros"], data.get("pajuSubs", []))
     write_robots(OUT_DIR, site["domain"])
 
     print(f"Generated {count} HTML files in {OUT_DIR}")
+    print(f"Generated blog.html + {blog_count - 1} blog posts")
     print("Generated sitemap.xml, robots.txt")
 
 

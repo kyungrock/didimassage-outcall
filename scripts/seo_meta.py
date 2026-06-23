@@ -199,7 +199,14 @@ def write_sitemap(out_dir: Path, domain: str, metros: list, paju_subs: list) -> 
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ]
-    for path, changefreq, priority in collect_sitemap_urls(metros, paju_subs):
+    urls = list(collect_sitemap_urls(metros, paju_subs))
+    try:
+        from blog import blog_sitemap_urls
+
+        urls.extend(blog_sitemap_urls())
+    except ImportError:
+        pass
+    for path, changefreq, priority in urls:
         loc = abs_url(domain, path)
         lines.append("  <url>")
         lines.append(f"    <loc>{xml_escape(loc)}</loc>")

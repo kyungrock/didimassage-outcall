@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>블로그 글 작성 - 20대, 30대 힐링 출장마사지</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/blog.css">
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div>
+        <div class="brand"><a href="index.html">20대, 30대 힐링 출장마사지</a></div>
+        <div class="sub">블로그 글 작성 · 마사지 정보 게시</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="toggle-btn" onclick="toggleMode()" aria-label="다크/라이트 모드">🌙/☀</button>
+        <a href="blog.html" class="cta" style="background:var(--accent);">블로그 목록</a>
+      </div>
+    </div>
+    <nav class="top-nav" aria-label="페이지 바로가기">
+      <a href="index.html">홈</a>
+      <a href="blog.html">블로그</a>
+      <a href="blog-write.html">글쓰기</a>
+    </nav>
+  </div>
+</header>
+
+<main class="blog-write-page">
+  <div class="container">
+    <h1>✏️ 마사지 블로그 글 작성</h1>
+    <p class="muted">제목·내용을 작성한 뒤 <strong>게시 파일 저장</strong> → PC에서 명령 실행 → GitHub push 하면 사이트에 올라갑니다.</p>
+
+    <div class="blog-write-layout">
+      <form class="blog-form card" id="blogForm" onsubmit="return false;">
+        <label for="postId">글 ID (영문·숫자·하이픈, 비우면 자동)</label>
+        <input type="text" id="postId" placeholder="예: seoul-outcall-tips">
+
+        <label for="postTitle">제목 *</label>
+        <input type="text" id="postTitle" required placeholder="예: 서울 출장마사지 예약 시 꼭 알아두세요">
+
+        <label for="postSummary">요약 (목록·검색용, 1~2문장) *</label>
+        <input type="text" id="postSummary" required placeholder="검색 결과에 보이는 짧은 설명">
+
+        <label for="postTags">태그 (쉼표로 구분)</label>
+        <input type="text" id="postTags" placeholder="출장마사지, 서울, 이용팁">
+
+        <label for="postAuthor">작성자</label>
+        <input type="text" id="postAuthor" value="힐링 출장마사지">
+
+        <label for="postDate">날짜</label>
+        <input type="date" id="postDate">
+
+        <label for="postImage">대표 이미지 URL</label>
+        <input type="text" id="postImage" value="/img/model-1.png" placeholder="/img/model-1.png">
+
+        <label>본문 HTML *</label>
+        <div class="blog-toolbar">
+          <button type="button" data-wrap="p">문단</button>
+          <button type="button" data-wrap="h2">소제목</button>
+          <button type="button" data-wrap="h3">소소제목</button>
+          <button type="button" data-wrap="strong">굵게</button>
+          <button type="button" data-wrap="ul">목록</button>
+        </div>
+        <textarea id="postContent" required placeholder="<p>첫 문단...</p>&#10;<h2>소제목</h2>&#10;<p>내용...</p>"></textarea>
+
+        <label>
+          <input type="checkbox" id="postPublished" checked> 공개 (체크 해제 시 임시 보관)
+        </label>
+
+        <div class="blog-form-actions">
+          <button type="button" class="blog-btn-primary" id="btnPreview">미리보기</button>
+          <button type="button" class="blog-btn-secondary" id="btnSaveDraft">임시저장</button>
+          <button type="button" class="blog-btn-secondary" id="btnDownloadPost">게시 파일 저장</button>
+          <button type="button" class="blog-btn-outline" id="btnLoadPosts">기존 글 불러오기</button>
+          <button type="button" class="blog-btn-outline" id="btnClear">초기화</button>
+        </div>
+        <div class="blog-status" id="statusBox"></div>
+      </form>
+
+      <div class="card blog-preview" id="previewBox">
+        <h3 style="margin-top:0;">미리보기</h3>
+        <div id="previewContent" class="blog-content muted">왼쪽에서 작성 후 「미리보기」를 누르세요.</div>
+      </div>
+    </div>
+
+    <div class="card blog-help">
+      <h3>📤 게시 방법 (3단계)</h3>
+      <ol>
+        <li>위에서 글 작성 → <strong>게시 파일 저장</strong> 클릭 → <code>blog-draft.json</code> 다운로드</li>
+        <li>PowerShell에서 프로젝트 폴더로 이동 후 실행:
+          <pre style="overflow:auto;background:var(--card);padding:12px;border-radius:8px;margin:8px 0;">cd "D:\경락\커서\site setting\outcallsite\1"
+python scripts/publish_blog.py --add blog-draft.json
+python scripts/generate_pages.py</pre>
+        </li>
+        <li>GitHub에 올리기:
+          <pre style="overflow:auto;background:var(--card);padding:12px;border-radius:8px;margin:8px 0;">git add data/blog-posts.json blog.html blog/ css/blog.css sitemap.xml
+git commit -m "블로그 글 추가"
+git push origin master</pre>
+        </li>
+      </ol>
+      <p class="muted">또는 채팅에 글 내용을 보내주시면 대신 올려 드릴 수 있습니다.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-strong">20대, 30대 힐링 출장마사지</div>
+    <div class="muted" style="margin-top:8px;">© 2026 healingoutcallmassage.com</div>
+  </div>
+</footer>
+<script src="js/common.js"></script>
+<script>
+(function () {
+  const DRAFT_KEY = "blog-write-draft";
+  const els = {
+    id: document.getElementById("postId"),
+    title: document.getElementById("postTitle"),
+    summary: document.getElementById("postSummary"),
+    tags: document.getElementById("postTags"),
+    author: document.getElementById("postAuthor"),
+    date: document.getElementById("postDate"),
+    image: document.getElementById("postImage"),
+    content: document.getElementById("postContent"),
+    published: document.getElementById("postPublished"),
+    preview: document.getElementById("previewContent"),
+    status: document.getElementById("statusBox"),
+  };
+
+  els.date.value = new Date().toISOString().slice(0, 10);
+
+  function slugify(text) {
+    return (text || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s-가-힣]/g, "")
+      .replace(/[\s_]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 50);
+  }
+
+  function showStatus(msg, ok) {
+    els.status.textContent = msg;
+    els.status.className = "blog-status show " + (ok ? "ok" : "err");
+  }
+
+  function getPostFromForm() {
+    const tags = els.tags.value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    let id = els.id.value.trim();
+    if (!id) {
+      id = slugify(els.title.value) || "post-" + Date.now();
+      els.id.value = id;
+    }
+    return {
+      id,
+      title: els.title.value.trim(),
+      summary: els.summary.value.trim(),
+      content: els.content.value.trim(),
+      tags,
+      author: els.author.value.trim() || "힐링 출장마사지",
+      date: els.date.value || new Date().toISOString().slice(0, 10),
+      image: els.image.value.trim() || "/img/model-1.png",
+      published: els.published.checked,
+    };
+  }
+
+  function fillForm(post) {
+    els.id.value = post.id || "";
+    els.title.value = post.title || "";
+    els.summary.value = post.summary || "";
+    els.tags.value = (post.tags || []).join(", ");
+    els.author.value = post.author || "힐링 출장마사지";
+    els.date.value = (post.date || "").slice(0, 10) || new Date().toISOString().slice(0, 10);
+    els.image.value = post.image || "/img/model-1.png";
+    els.content.value = post.content || "";
+    els.published.checked = post.published !== false;
+  }
+
+  function downloadJson(filename, data) {
+    const blob = new Blob([JSON.stringify(data, null, 2) + "\n"], {
+      type: "application/json",
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  document.getElementById("btnPreview").addEventListener("click", () => {
+    const post = getPostFromForm();
+    if (!post.title || !post.content) {
+      showStatus("제목과 본문을 입력해 주세요.", false);
+      return;
+    }
+    els.preview.innerHTML =
+      "<h2>" +
+      post.title +
+      "</h2><p class='muted'>" +
+      post.summary +
+      "</p>" +
+      post.content;
+    els.preview.classList.remove("muted");
+    showStatus("미리보기를 갱신했습니다.", true);
+  });
+
+  document.getElementById("btnSaveDraft").addEventListener("click", () => {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(getPostFromForm()));
+    showStatus("브라우저에 임시저장했습니다.", true);
+  });
+
+  document.getElementById("btnDownloadPost").addEventListener("click", () => {
+    const post = getPostFromForm();
+    if (!post.title || !post.content) {
+      showStatus("제목과 본문을 입력해 주세요.", false);
+      return;
+    }
+    downloadJson("blog-draft.json", post);
+    showStatus(
+      "blog-draft.json 저장됨 → publish_blog.py --add blog-draft.json 실행 후 push",
+      true
+    );
+  });
+
+  document.getElementById("btnLoadPosts").addEventListener("click", async () => {
+    try {
+      const res = await fetch("data/blog-posts.json");
+      if (!res.ok) throw new Error("파일 없음");
+      const data = await res.json();
+      const posts = data.posts || [];
+      if (!posts.length) {
+        showStatus("등록된 글이 없습니다.", false);
+        return;
+      }
+      const titles = posts.map((p, i) => i + 1 + ". " + p.title).join("\n");
+      const idx = prompt(
+        "수정할 글 번호를 입력하세요:\n\n" + titles,
+        "1"
+      );
+      const n = parseInt(idx, 10) - 1;
+      if (n >= 0 && n < posts.length) {
+        fillForm(posts[n]);
+        showStatus("「" + posts[n].title + "」 불러옴", true);
+      }
+    } catch (e) {
+      showStatus("기존 글을 불러오지 못했습니다. 로컬에서 열거나 push 후 다시 시도하세요.", false);
+    }
+  });
+
+  document.getElementById("btnClear").addEventListener("click", () => {
+    if (!confirm("작성 중인 내용을 지울까요?")) return;
+    els.id.value = "";
+    els.title.value = "";
+    els.summary.value = "";
+    els.tags.value = "";
+    els.content.value = "";
+    els.date.value = new Date().toISOString().slice(0, 10);
+    els.preview.innerHTML = "왼쪽에서 작성 후 「미리보기」를 누르세요.";
+    els.preview.classList.add("muted");
+    localStorage.removeItem(DRAFT_KEY);
+    showStatus("초기화했습니다.", true);
+  });
+
+  document.querySelectorAll(".blog-toolbar button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tag = btn.dataset.wrap;
+      const ta = els.content;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const sel = ta.value.slice(start, end) || "내용";
+      let insert = "";
+      if (tag === "p") insert = "<p>" + sel + "</p>";
+      else if (tag === "h2") insert = "<h2>" + sel + "</h2>";
+      else if (tag === "h3") insert = "<h3>" + sel + "</h3>";
+      else if (tag === "strong") insert = "<strong>" + sel + "</strong>";
+      else if (tag === "ul")
+        insert = "<ul>\n<li>" + sel + "</li>\n<li></li>\n</ul>";
+      ta.value = ta.value.slice(0, start) + insert + ta.value.slice(end);
+      ta.focus();
+    });
+  });
+
+  const saved = localStorage.getItem(DRAFT_KEY);
+  if (saved) {
+    try {
+      fillForm(JSON.parse(saved));
+      showStatus("이전 임시저장 글을 불러왔습니다.", true);
+    } catch (e) {}
+  }
+})();
+</script>
+</body>
+</html>
