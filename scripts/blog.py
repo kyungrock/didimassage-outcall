@@ -169,14 +169,8 @@ def post_card_html(post: dict, depth: int = 0) -> str:
     prefix = "../" * depth
     tags = post.get("tags") or []
     tag_html = "".join(f'<span class="blog-tag">{esc(t)}</span>' for t in tags[:5])
-    img = post.get("image") or "/img/model-1.png"
-    if img.startswith("/"):
-        img = prefix + img.lstrip("/")
     return f"""<article class="blog-card">
   <a href="{prefix}blog/{esc(post["id"])}.html" class="blog-card-link">
-    <div class="blog-card-image-wrap">
-      <img src="{esc(img)}" alt="{esc(post.get("title", ""))}" loading="lazy" decoding="async">
-    </div>
     <div class="blog-card-body">
       <time class="blog-date" datetime="{esc(post.get("date", ""))}">{esc(format_date_kr(post.get("date", "")))}</time>
       <h2 class="blog-card-title">{esc(post.get("title", ""))}</h2>
@@ -249,8 +243,6 @@ def render_blog_post(site: dict, post: dict, all_posts: list[dict]) -> str:
     meta_desc = post.get("summary", "")[:160]
     tags = post.get("tags") or []
     tag_html = "".join(f'<span class="blog-tag">{esc(t)}</span>' for t in tags)
-    img = post.get("image") or site.get("heroImage", "/img/model-1.png")
-    og_img = img if img.startswith("http") else site["domain"] + img
     breadcrumb_ld = json_ld_breadcrumb(
         [
             {"name": "홈", "url": site["domain"] + "/"},
@@ -271,7 +263,6 @@ def render_blog_post(site: dict, post: dict, all_posts: list[dict]) -> str:
                 "name": site["name"],
                 "url": site["domain"] + "/",
             },
-            "image": og_img,
             "mainEntityOfPage": canonical,
         },
         ensure_ascii=False,
@@ -292,9 +283,6 @@ def render_blog_post(site: dict, post: dict, all_posts: list[dict]) -> str:
       <h3>다른 글 보기</h3>
       <ul class="blog-related-list">{items}</ul>
     </aside>"""
-    hero_img = img if not img.startswith("http") else img
-    if hero_img.startswith("/"):
-        hero_img = ".." + hero_img
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -304,7 +292,7 @@ def render_blog_post(site: dict, post: dict, all_posts: list[dict]) -> str:
   <meta name="description" content="{esc(meta_desc)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="{canonical}">
-{og_head_tags(site, page_title, meta_desc, canonical, image=og_img, og_type="article")}
+{og_head_tags(site, page_title, meta_desc, canonical, og_type="article")}
   <link rel="stylesheet" href="../css/common.css">
   <link rel="stylesheet" href="../css/blog.css">
 {schema}
@@ -323,7 +311,6 @@ def render_blog_post(site: dict, post: dict, all_posts: list[dict]) -> str:
       <div class="blog-tags">{tag_html}</div>
       <p class="blog-author muted">작성: {esc(post.get("author", site["name"]))}</p>
     </header>
-    <img class="blog-article-image" src="{esc(hero_img)}" alt="{esc(title)}" loading="eager" decoding="async">
     <div class="blog-content card">
       {normalize_content(post.get("content", ""))}
     </div>

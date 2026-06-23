@@ -54,9 +54,6 @@
         <label for="postDate">날짜</label>
         <input type="date" id="postDate">
 
-        <label for="postImage">대표 이미지 URL</label>
-        <input type="text" id="postImage" value="/img/model-1.png" placeholder="/img/model-1.png">
-
         <label>본문 HTML *</label>
         <div class="blog-toolbar">
           <button type="button" data-wrap="p">문단</button>
@@ -125,7 +122,6 @@ git push origin master</pre>
     tags: document.getElementById("postTags"),
     author: document.getElementById("postAuthor"),
     date: document.getElementById("postDate"),
-    image: document.getElementById("postImage"),
     content: document.getElementById("postContent"),
     published: document.getElementById("postPublished"),
     preview: document.getElementById("previewContent"),
@@ -168,7 +164,6 @@ git push origin master</pre>
       tags,
       author: els.author.value.trim() || "힐링 출장마사지",
       date: els.date.value || new Date().toISOString().slice(0, 10),
-      image: els.image.value.trim() || "/img/model-1.png",
       published: els.published.checked,
     };
   }
@@ -180,7 +175,6 @@ git push origin master</pre>
     els.tags.value = (post.tags || []).join(", ");
     els.author.value = post.author || "힐링 출장마사지";
     els.date.value = (post.date || "").slice(0, 10) || new Date().toISOString().slice(0, 10);
-    els.image.value = post.image || "/img/model-1.png";
     els.content.value = post.content || "";
     els.published.checked = post.published !== false;
   }
