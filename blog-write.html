@@ -72,6 +72,7 @@
             <input type="checkbox" id="linkNewTab" checked> 새 창에서 열기
           </label>
           <button type="button" class="blog-btn-secondary" id="btnInsertLink">링크 삽입</button>
+          <button type="button" class="blog-btn-outline" id="btnInsertLinkList">링크 목록(ul)</button>
         </div>
         <textarea id="postContent" required placeholder="<p>첫 문단...</p>&#10;<h2>소제목</h2>&#10;<p>내용... <a href=&quot;https://healingoutcallmassage.com&quot;>홈페이지</a></p>"></textarea>
 
@@ -328,9 +329,44 @@ git push origin master</pre>
     const sel = ta.value.slice(ta.selectionStart, ta.selectionEnd);
     const text = (linkText.value || "").trim() || sel || url;
     const target = linkNewTab.checked ? ' target="_blank" rel="noopener noreferrer"' : "";
-    const insert = '<a href="' + url.replace(/"/g, "&quot;") + '"' + target + ">" + text + "</a>";
+    const insert =
+      "<p><a href=\"" +
+      url.replace(/"/g, "&quot;") +
+      "\"" +
+      target +
+      ">" +
+      text +
+      "</a></p>\n";
     insertAtCursor(insert);
     showStatus("링크를 삽입했습니다.", true);
+    linkUrl.value = "";
+    linkText.value = "";
+  });
+
+  document.getElementById("btnInsertLinkList").addEventListener("click", () => {
+    let url = (linkUrl.value || "").trim();
+    if (!url) {
+      showStatus("URL을 입력해 주세요.", false);
+      linkUrl.focus();
+      return;
+    }
+    if (!/^https?:\/\//i.test(url) && !url.startsWith("/") && !url.startsWith("tel:")) {
+      url = "https://" + url;
+    }
+    const ta = els.content;
+    const sel = ta.value.slice(ta.selectionStart, ta.selectionEnd);
+    const text = (linkText.value || "").trim() || sel || "링크";
+    const target = linkNewTab.checked ? ' target="_blank" rel="noopener noreferrer"' : "";
+    const item =
+      "  <li><a href=\"" +
+      url.replace(/"/g, "&quot;") +
+      "\"" +
+      target +
+      ">" +
+      text +
+      "</a></li>\n";
+    insertAtCursor("<ul>\n" + item + "  <li></li>\n</ul>\n");
+    showStatus("링크 목록을 삽입했습니다.", true);
     linkUrl.value = "";
     linkText.value = "";
   });

@@ -77,8 +77,29 @@ def format_date_kr(d: str) -> str:
     return f"{y}년 {int(m)}월 {int(day)}일"
 
 
+def inline_format(text: str) -> str:
+    """문단 내 **굵게**, [텍스트](URL) 링크"""
+    s = esc(text)
+    s = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", s)
+    s = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        r'<a href="\2" target="_blank" rel="noopener noreferrer">\1</a>',
+        s,
+    )
+    return s
+
+
+def fix_escaped_html(content: str) -> str:
+    """이중 이스케이프된 &lt;a&gt; 태그 복원"""
+    if "&lt;a " not in content and "&lt;/a&gt;" not in content:
+        return content
+    import html as html_module
+
+    return html_module.unescape(content)
+
+
 def markdown_to_html(text: str) -> str:
-    """간단한 마크다운 → HTML (글쓰기 페이지에서 #, ##, * 목록 사용 시)"""
+    """간단한 마크다운 → HTML (#, ##, *, 링크, HTML 태그 줄 지원)"""
     lines = (text or "").replace("\r\n", "\n").split("\n")
     parts: list[str] = []
     in_ul = False
@@ -94,23 +115,33 @@ def markdown_to_html(text: str) -> str:
         if not stripped:
             close_ul()
             continue
-        if stripped.startswith("### "):
+        if re.search(r"^<a\s+href=", stripped, re.I) or re.search(
+            r"^<p>\s*<a\s+href=", stripped, re.I
+        ):
             close_ul()
-            parts.append(f"<h3>{esc(stripped[4:])}</h3>")
+            parts.append(stripped if stripped.startswith("<p>") else f"<p>{stripped}</p>")
+        elif stripped.startswith("<") and (
+            stripped.endswith(">") or "</" in stripped
+        ):
+            close_ul()
+            parts.append(stripped)
+        elif stripped.startswith("### "):
+            close_ul()
+            parts.append(f"<h3>{inline_format(stripped[4:])}</h3>")
         elif stripped.startswith("## "):
             close_ul()
-            parts.append(f"<h2>{esc(stripped[3:])}</h2>")
+            parts.append(f"<h2>{inline_format(stripped[3:])}</h2>")
         elif stripped.startswith("# "):
             close_ul()
-            parts.append(f"<h2>{esc(stripped[2:])}</h2>")
+            parts.append(f"<h2>{inline_format(stripped[2:])}</h2>")
         elif stripped.startswith("* "):
             if not in_ul:
                 parts.append("<ul>")
                 in_ul = True
-            parts.append(f"<li>{esc(stripped[2:])}</li>")
+            parts.append(f"<li>{inline_format(stripped[2:])}</li>")
         else:
             close_ul()
-            parts.append(f"<p>{esc(stripped)}</p>")
+            parts.append(f"<p>{inline_format(stripped)}</p>")
 
     close_ul()
     return "\n".join(parts)
@@ -121,8 +152,8 @@ def normalize_content(content: str) -> str:
     if not c:
         return ""
     if c.startswith("<"):
-        return c
-    return markdown_to_html(c)
+        return fix_escaped_html(c)
+    return fix_escaped_html(markdown_to_html(c))
 
 
 def blog_header(site: dict, *, sub: str, depth: int = 0) -> str:
@@ -376,8 +407,8 @@ def merge_draft(draft_path: Path) -> dict:
             p["date"] = date.today().isoformat()
         p.setdefault("published", True)
         p.setdefault("author", "힐링 출장마사지")
-        if p.get("content") and not str(p["content"]).strip().startswith("<"):
-            p["content"] = normalize_content(p["content"])
+        if p.get("content"):
+            p["content"] = normalize_content(str(p["content"]))
         if p["id"] in by_id:
             posts[by_id[p["id"]]] = p
             updated += 1
