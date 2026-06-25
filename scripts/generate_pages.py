@@ -965,8 +965,8 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
     </div>
   </div>
 </section>
-{sudo_seo}
 {shop_section_html("수도권", "", "", "", "", cards_title="💆 수도권 출장마사지 업체")}
+{sudo_seo}
 <section id="blog-link">
   <div class="container">
     <h2>📝 출장마사지 블로그</h2>
