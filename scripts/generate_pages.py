@@ -768,10 +768,156 @@ def render_metro_hub(site: dict, metro: dict) -> str:
 """
 
 
-def render_index(site: dict, metros: list) -> str:
+def index_area_links(metro: dict, limit: int | None = None) -> str:
+    areas = metro["areas"][:limit] if limit else metro["areas"]
+    items = [
+        f'<li><a href="{a["slug"]}.html">{esc(a["short"])} 출장마사지</a></li>'
+        for a in areas
+    ]
+    return "\n        ".join(items)
+
+
+def index_faq_json_ld() -> str:
+    faqs = [
+        (
+            "서울·경기·인천 어디까지 출장마사지 방문이 가능한가요?",
+            "강남·마포·송파·분당·일산·송도·부평 등 수도권 시·구·동 단위로 방문 가능 여부를 상담해 드립니다. 자택, 호텔, 오피스텔 등 이용 장소를 알려주시면 가장 가까운 관리사를 배정합니다.",
+        ),
+        (
+            "수도권 출장마사지 코스는 어떤 종류가 있나요?",
+            "타이마사지, 아로마, 스웨디시, 프리미엄 힐링 코스 등 목적에 맞는 코스를 선택할 수 있습니다. 60·90·120분 등 시간대별 가격은 상담 시 안내해 드립니다.",
+        ),
+        (
+            "강남·홍대·잠실 등 서울 핫플레이스에서도 예약할 수 있나요?",
+            "네. 역삼·논현·홍대·합정·잠실·여의도 등 서울 주요 상권과 주거 지역 모두 예약 가능합니다. 구체적인 동·호수를 알려주시면 방문 시간을 조율합니다.",
+        ),
+        (
+            "경기 신도시(동탄·판교·운정) 출장도 되나요?",
+            "동탄, 판교, 일산, 운정, 김포, 하남 미사 등 경기 주요 신도시와 외곽 지역까지 수도권 전역 커버가 가능합니다. 거리·시간에 따라 배정이 달라질 수 있어 미리 상담을 권장합니다.",
+        ),
+        (
+            "인천 송도·영종도·청라에서도 이용할 수 있나요?",
+            "연수구 송도, 서구 청라·검단, 중구 영종·운서, 부평·남동 등 인천 전 지역 상담 및 예약이 가능합니다.",
+        ),
+    ]
+    entities = []
+    for q, a in faqs:
+        entities.append(
+            {
+                "@type": "Question",
+                "name": q,
+                "acceptedAnswer": {"@type": "Answer", "text": a},
+            }
+        )
+    return json.dumps(
+        {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": entities},
+        ensure_ascii=False,
+        indent=2,
+    )
+
+
+def index_sudo_seo_html(metros: list, pricing: dict, site: dict) -> str:
+    seoul = next(m for m in metros if m["id"] == "seoul")
+    gyeonggi = next(m for m in metros if m["id"] == "gyeonggi")
+    incheon = next(m for m in metros if m["id"] == "incheon")
+    price_block = pricing_tables(pricing, "수도권", "")
+    return f"""
+<section id="sudo-intro">
+  <div class="container">
+    <h2>서울·경기·인천 수도권 출장마사지</h2>
+    <div class="card">
+      <p><strong>20대·30대 전문 테라피스트</strong>가 수도권 전역을 방문하는 출장마사지(출장안마) 서비스입니다. 강남 업무지구, 판교 테크밸리, 송도 국제도시, 일산·분당 주거 단지, 인천 공항 인근 호텔까지 <strong>24시간</strong> 상담·예약이 가능합니다.</p>
+      <p>서울 25개 자치구, 경기 주요 시·군, 인천 8개 구·군별로 <strong>지역 맞춤 페이지</strong>를 운영하고 있어 내 동네 키워드(예: 강남 출장마사지, 분당 출장마사지, 송도 출장마사지)로 검색해도 정확한 안내를 받을 수 있습니다.</p>
+      <p>장시간 앉아 있는 직장인, 야근 후 피로, 출장 중 호텔 투숙객, 육아로 몸이 뭉친 분들께 <strong>스웨디시·아로마·타이</strong> 코스로 맞춤 케어를 제공합니다. 전화 한 통이면 관리사 배정부터 방문 시간까지 빠르게 안내해 드립니다.</p>
+    </div>
+  </div>
+</section>
+<section id="seoul-areas">
+  <div class="container">
+    <h2>📍 서울 출장마사지 — 구별 바로가기</h2>
+    <div class="card">
+      <p class="muted">강남·서초·송파·마포·용산·영등포 등 서울 전 구 방문. 아래에서 구를 선택하면 동네별 상세 안내를 볼 수 있습니다.</p>
+      <ul class="region-list">
+        {index_area_links(seoul)}
+        <li><a href="seoul.html">서울 전체 보기</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="gyeonggi-areas">
+  <div class="container">
+    <h2>📍 경기 출장마사지 — 시·군별 바로가기</h2>
+    <div class="card">
+      <p class="muted">수원, 성남·분당, 고양·일산, 용인, 부천, 화성·동탄, 파주·운정 등 경기 주요 도시 전역 커버.</p>
+      <ul class="region-list">
+        {index_area_links(gyeonggi)}
+        <li><a href="gyeonggi.html">경기 전체 보기</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="incheon-areas">
+  <div class="container">
+    <h2>📍 인천 출장마사지 — 구·군별 바로가기</h2>
+    <div class="card">
+      <p class="muted">송도, 청라, 검단, 부평, 연수, 영종도·공항 인근 호텔까지 인천 전역 방문 가능.</p>
+      <ul class="region-list">
+        {index_area_links(incheon)}
+        <li><a href="incheon.html">인천 전체 보기</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="course">
+  <div class="container">
+    <h2>💆 수도권 출장마사지 코스·가격</h2>
+    <div class="card">
+      <p class="muted">목적과 피로도에 맞는 코스를 선택하세요. 정확한 금액·가능 시간은 상담 시 안내됩니다.</p>
+      {price_block}
+    </div>
+  </div>
+</section>
+<section id="why">
+  <div class="container">
+    <h2>수도권에서 출장마사지를 찾는 이유</h2>
+    <div class="card">
+      <h3>1. 이동 없이 받는 편의성</h3>
+      <p>강남·홍대·잠실 등 교통 체증이 심한 지역도 집·호텔에서 대기만 하면 됩니다. 늦은 밤·새벽에도 이동 부담 없이 이용할 수 있습니다.</p>
+      <h3>2. 지역별 맞춤 배정</h3>
+      <p>서울·경기·인천 각 구·동 단위로 서비스 가능 지역을 세분화해, 가장 가까운 테라피스트를 배정합니다.</p>
+      <h3>3. 20대·30대 전문 관리사</h3>
+      <p>젊고 숙련된 테라피스트가 스웨디시·아로마·타이 등 코스별 맞춤 시술을 진행합니다.</p>
+      <h3>4. 호텔·오피스텔·자택 모두 OK</h3>
+      <p>출장·여행 중 호텔, 재택근무 공간, 일반 자택 등 이용 장소에 맞춰 방문합니다.</p>
+    </div>
+  </div>
+</section>
+<section id="faq">
+  <div class="container">
+    <h2>❓ 수도권 출장마사지 FAQ</h2>
+    <div class="card">
+      <h3>서울·경기·인천 어디까지 방문 가능한가요?</h3>
+      <p>강남·마포·송파·분당·일산·송도·부평 등 수도권 시·구·동 단위로 상담 후 배정합니다.</p>
+      <h3>어떤 코스를 선택하면 좋을까요?</h3>
+      <p>근육 뭉침·피로 회복은 스웨디시, 향기·이완은 아로마, 옷 입은 채 스트레칭은 타이마사지를 추천합니다.</p>
+      <h3>강남·홍대·잠실 등 핫플레이스에서도 예약되나요?</h3>
+      <p>네. 서울 주요 상권·주거 지역 모두 예약 가능합니다.</p>
+      <h3>경기 신도시(동탄·판교·운정)도 되나요?</h3>
+      <p>동탄, 판교, 일산, 운정, 김포, 하남 미사 등 경기 전역 상담 가능합니다.</p>
+      <h3>인천 송도·영종도에서도 이용할 수 있나요?</h3>
+      <p>송도, 청라, 검단, 영종·운서, 부평 등 인천 전 지역 예약 가능합니다.</p>
+    </div>
+  </div>
+</section>
+"""
+
+
+def render_index(site: dict, metros: list, pricing: dict) -> str:
     canonical = f"{site['domain']}/"
     page_title = "서울·경기·인천 출장마사지｜20대, 30대 - 24시 출장안마"
-    meta_desc = "서울·경기·인천·부산·대구·대전·광주·울산 시·구별 출장마사지. 24시간 후불제, 전지역 방문, 전화/카톡 즉시 상담."
+    meta_desc = "서울·경기·인천 수도권 출장마사지. 강남·분당·송도·일산 등 시·구별 24시간 방문, 20·30대 전문 테라피스트, 스웨디시·아로마·타이 코스. 전화·카톡 즉시 상담."
+    faq_ld = index_faq_json_ld()
+    sudo_seo = index_sudo_seo_html(metros, pricing, site)
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -786,7 +932,7 @@ def render_index(site: dict, metros: list) -> str:
   <link rel="stylesheet" href="css/common.css">
   {SHOP_CSS}
   {REGION_CSS}
-{seo_schema_block(site, canonical=canonical, region_label="전국", page_region="", item_list_name="전국 출장마사지 업체", local_desc=meta_desc)}
+{seo_schema_block(site, canonical=canonical, region_label="서울·경기·인천", page_region="수도권", item_list_name="수도권 출장마사지 업체", local_desc=meta_desc, faq_ld=faq_ld)}
 </head>
 <body>
 {site_top_open()}
@@ -795,7 +941,7 @@ def render_index(site: dict, metros: list) -> str:
     <div class="header-inner">
       <div>
         <div class="brand">{site["name"]}</div>
-        <div class="sub">전국 출장마사지 · 시·구별 안내 · 24시간 · 후불제</div>
+        <div class="sub">서울·경기·인천 수도권 출장마사지 · 24시간 · 20·30대 전문관리</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <button class="toggle-btn" onclick="toggleMode()" aria-label="다크/라이트">🌙/☀</button>
@@ -808,18 +954,19 @@ def render_index(site: dict, metros: list) -> str:
 {site_top_close()}
 <main>
 <section class="hero">
-  <img src="{site["heroImage"]}" alt="전국 출장마사지" class="hero-bg" width="1200" height="800" loading="eager" fetchpriority="high">
+  <img src="{site["heroImage"]}" alt="서울·경기·인천 수도권 출장마사지" class="hero-bg" width="1200" height="800" loading="eager" fetchpriority="high">
   <div class="hero-content">
-    <h1>전국 출장마사지 · 시·구별 24시간 후불</h1>
-    <p>서울·경기·인천·부산 등 전국 시·구 방문 · 자택/호텔/오피스텔 · 전문 테라피스트</p>
+    <h1>서울·경기·인천 출장마사지 · 24시 출장안마</h1>
+    <p>강남·분당·송도·일산 등 수도권 전역 · 자택·호텔·오피스텔 · 20·30대 전문 테라피스트</p>
     <a href="tel:{site["phoneTel"]}" class="cta-btn">지금 전화 상담하기</a>
     <div class="phone-display">📞 {site["phone"]}</div>
     <div class="badges">
-      <span>24시간</span><span>후불제</span><span>전국</span><span>즉시상담</span>
+      <span>24시간</span><span>수도권전지역</span><span>20·30대</span><span>즉시상담</span>
     </div>
   </div>
 </section>
-{shop_section_html("전국", "", "", "", "")}
+{sudo_seo}
+{shop_section_html("수도권", "", "", "", "", cards_title="💆 수도권 출장마사지 업체")}
 <section id="blog-link">
   <div class="container">
     <h2>📝 출장마사지 블로그</h2>
@@ -843,7 +990,7 @@ def render_index(site: dict, metros: list) -> str:
 <footer>
   <div class="container">
     <div class="foot-strong">{site["name"]}</div>
-    <div>전국 출장마사지 · {site["phone"]} · 24시간</div>
+    <div>서울·경기·인천 출장마사지 · {site["phone"]} · 24시간</div>
     <div class="muted" style="margin-top:8px;">© 2026 {esc(site_host(site))}</div>
   </div>
 </footer>
@@ -1078,7 +1225,7 @@ def main():
         count += 1
 
     (OUT_DIR / "index.html").write_text(
-        render_index(site, data["metros"]), encoding="utf-8"
+        render_index(site, data["metros"], data["pricing"]), encoding="utf-8"
     )
     count += 1
 
