@@ -255,7 +255,7 @@ def pricing_tables(pricing: dict, prefix: str, slug: str = "") -> str:
         heading = (
             course_heading(prefix, key, course["name"], slug)
             if slug
-            else f"{prefix} {key} 코스 — {course['name']}"
+            else f"{esc(course.get('tier', key))} · {esc(course['name'])}"
         )
         parts.append(
             f"""
@@ -269,6 +269,79 @@ def pricing_tables(pricing: dict, prefix: str, slug: str = "") -> str:
       <div class="hr"></div>"""
         )
     return "\n".join(parts)
+
+
+def pricing_cards(pricing: dict, prefix: str) -> str:
+    cards = []
+    for key in ("A", "B", "C"):
+        course = pricing[key]
+        tier = course.get("tier", key)
+        desc = course.get("desc", "")
+        rows = "".join(
+            f"<li><span>{esc(r[0])}</span><strong>{esc(r[1])}</strong></li>"
+            for r in course["rows"]
+        )
+        desc_html = (
+            f'<p class="rate-card-desc">{esc(desc)}</p>' if desc else ""
+        )
+        cards.append(
+            f"""
+    <article class="rate-card rate-card--{key.lower()}">
+      <div class="rate-card-label">{esc(tier)}</div>
+      <h3>{esc(course["name"])}</h3>
+      {desc_html}
+      <ul class="rate-list">{rows}</ul>
+    </article>"""
+        )
+    return f'<div class="rate-grid">{"".join(cards)}</div>'
+
+
+def hero_split_html(
+    site: dict,
+    h1: str,
+    lead: str,
+    *,
+    tags: list[str] | None = None,
+    image_alt: str = "",
+) -> str:
+    tags_html = ""
+    if tags:
+        tags_html = (
+            '<div class="hero-tags">'
+            + "".join(f"<span>{esc(t)}</span>" for t in tags)
+            + "</div>"
+        )
+    alt = image_alt or h1
+    if site.get("heroStyle") == "brand":
+        visual = f"""
+    <figure class="hero-visual">
+      <div class="hero-art" role="img" aria-label="{esc(alt)}"></div>
+    </figure>"""
+    else:
+        visual = f"""
+    <figure class="hero-visual">
+      <img src="{site["heroImage"]}" alt="{esc(alt)}" class="hero-photo" width="600" height="450" loading="eager" fetchpriority="high" decoding="async">
+    </figure>"""
+    return f"""
+<section class="hero-split" aria-label="{esc(h1)}">
+  <div class="container hero-split-inner">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">{esc(site["name"])}</p>
+      <h1>{esc(h1)}</h1>
+      <p class="hero-lead">{esc(lead)}</p>
+      <div class="hero-actions">
+        <a href="tel:{site["phoneTel"]}" class="cta-btn">📞 {site["phone"]}</a>
+        <a href="{site["kakao"]}" class="cta-btn-outline" rel="noopener noreferrer">카톡 상담</a>
+      </div>
+      {tags_html}
+    </div>{visual}
+  </div>
+</section>"""
+
+
+def site_nav_html(links: list[tuple[str, str]]) -> str:
+    items = "".join(f'<a href="{href}">{esc(label)}</a>' for href, label in links)
+    return f'<nav class="site-nav" aria-label="페이지 메뉴">{items}</nav>'
 
 
 def local_highlight_html(region_label: str, content: AreaContent) -> str:
@@ -307,7 +380,7 @@ def why_section_html(
             f"{region_label} 호텔·펜션·자택·오피스텔로 관리사가 직접 방문합니다. 샵까지 이동할 필요 없이 편한 공간에서 케어를 받을 수 있습니다.",
             f"24시간 전화·카톡 상담으로 {region_label} 기준 빠른 배정이 가능합니다. 퇴근 후, 여행 중, 갑작스러운 피로가 쌓였을 때도 부담 없이 문의하세요.",
             "관리사 도착·코스 확인 후 결제하는 후불제로 운영됩니다. 현금·계좌이체·카드 등 결제 방법은 상담 시 안내해 드립니다.",
-            f"건식·아로마·힐링(스웨디시) 등 원하시는 강도와 부위에 맞춰 코스를 안내합니다. {dong_hint} 등 {region_label} 전지역에서 이용하실 수 있습니다.",
+            f"바디 릴렉스·스웨디시·아로마 등 원하시는 강도와 부위에 맞춰 코스를 안내합니다. {dong_hint} 등 {region_label} 전지역에서 이용하실 수 있습니다.",
         ]
     blocks = []
     for title, body in zip(titles, bodies):
@@ -355,7 +428,7 @@ def faq_schema_items(
         ),
         (
             "어떤 코스를 선택할 수 있나요?",
-            "건식·아로마·힐링(스웨디시) 등 피로 부위와 원하시는 강도에 맞춰 상담 후 코스를 추천해 드립니다. 시간·요금은 상단 가격표 또는 상담 시 확인하세요.",
+            "바디 릴렉스·스웨디시·아로마·시그니처 등 피로 부위와 원하시는 강도에 맞춰 상담 후 코스를 추천해 드립니다. 시간·요금은 상단 참고 요금 또는 상담 시 확인하세요.",
         ),
         (
             "늦은 시간·당일 예약도 가능한가요?",
@@ -485,25 +558,35 @@ def shop_section_html(
     metro_id: str,
     slug: str = "",
     cards_title: str = "",
+    *,
+    capital_only: bool = False,
+    section_note: str = "",
 ) -> str:
     cards_html, shop_count = render_shop_cards_grid(
-        region, district, display_label=region_label if district else ""
+        region,
+        district,
+        display_label=region_label if district else "",
+        capital_only=capital_only,
     )
     count_text = f"{shop_count}개 업체"
-    title = cards_title or f"💆 {esc(region_label)} 출장마사지 업체"
+    title = cards_title or f"{esc(region_label)} 출장마사지 업체"
+    capital_attr = ' data-capital-only="true"' if capital_only else ""
+    note_html = f'<p class="muted">{esc(section_note)}</p>' if section_note else (
+        '<p class="muted">카드를 클릭하면 코스·가격·리뷰 등 상세 정보를 확인할 수 있습니다.</p>'
+    )
     return f"""
 <section id="shops" class="shop-cards-section"
   data-region="{esc(region)}"
   data-district="{esc(district)}"
   data-region-label="{esc(region_label)}"
   data-metro="{esc(metro_id)}"
-  data-slug="{esc(slug if slug else "")}">
+  data-slug="{esc(slug if slug else "")}"{capital_attr}>
   <div class="container">
     <div class="shop-cards-head">
       <h2 id="shopCardsTitle">{title}</h2>
       <span id="shopCardsCount" class="shop-cards-count">{count_text}</span>
     </div>
-    <p class="muted">카드를 클릭하면 코스·가격·리뷰 등 상세 정보를 확인할 수 있습니다.</p>
+    {note_html}
     <div id="shopCardsGrid" class="shop-cards-grid" aria-live="polite">
 {cards_html}
     </div>
@@ -574,9 +657,8 @@ def render_area_page(
   <title>{esc(page_title)}</title>
   <meta name="description" content="{esc(meta_desc)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
-  <meta name="theme-color" content="#111111">
+  <meta name="theme-color" content="#0c1222">
   <link rel="canonical" href="{canonical}">
-  <link rel="preload" as="image" href="{site["heroImage"]}" fetchpriority="high">
 {og_head_tags(site, page_title, og_desc, canonical)}
   <link rel="stylesheet" href="css/common.css">
   {SHOP_CSS}
@@ -592,47 +674,32 @@ def render_area_page(
         <div class="brand"><a href="index.html">{site["name"]}</a></div>
         <div class="sub">{region_label} 출장마사지 · 24시간 · 후불제 · 전지역 방문</div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <button class="toggle-btn" onclick="toggleMode()" aria-label="다크/라이트 모드 전환">🌙/☀</button>
+      <div class="header-actions">
         <a href="tel:{site["phoneTel"]}" class="cta">전화문의</a>
       </div>
     </div>
-    <nav class="top-nav" aria-label="페이지 바로가기">
-      <a href="#shops">업체</a>
-      <a href="#price">가격</a>
-      <a href="#local">지역안내</a>
-      <a href="#why">장점</a>
-      <a href="#area">지역</a>
-      <a href="#faq">FAQ</a>
-      <a href="#map">지도</a>
-      <a href="#contact">상담</a>
-    </nav>
+    {site_nav_html([
+      ("#shops", "업체"),
+      ("#price", "요금"),
+      ("#local", "지역안내"),
+      ("#area", "주변지역"),
+      ("#faq", "FAQ"),
+      ("blog.html", "블로그"),
+      ("#contact", "문의"),
+    ])}
   </div>
 </header>
 {region_selector_html(metro["id"], slug)}
 {site_top_close()}
 <main>
-<section class="hero" aria-label="{esc(region_label)} 출장마사지">
-  <img src="{site["heroImage"]}" alt="{esc(region_label)} 출장마사지" class="hero-bg" width="1200" height="800" loading="eager" fetchpriority="high" decoding="async">
-  <div class="hero-content">
-    <h1>{esc(h1)}</h1>
-    <p>{dong_list} 등 {esc(region_label)} 전지역 · 자택/호텔/오피스텔 · 전화/카톡 즉시 상담</p>
-    <a href="tel:{site["phoneTel"]}" class="cta-btn">지금 전화 상담하기</a>
-    <div class="phone-display">📞 {site["phone"]}</div>
-    <div class="badges">
-      <span>24시간</span><span>후불제</span><span>전지역</span><span>즉시상담</span>
-    </div>
-  </div>
-</section>
 {shop_section_html(region_label, metro_name, short, metro["id"], slug)}
+{hero_split_html(site, h1, f"{dong_list} 등 {esc(region_label)} 전지역 · 자택·호텔·오피스텔 방문", tags=["24시간", "후불제", "구·동 맞춤"], image_alt=f"{region_label} 출장마사지")}
 <section id="price">
   <div class="container">
     {breadcrumb}
-    <h2>💆 {esc(region_label)} 출장마사지 코스별 가격</h2>
-    <div class="card">
-      <p class="muted">정확한 금액/가능 여부는 상담 시 안내됩니다.</p>
-      {pricing_tables(pricing, price_prefix, slug)}
-    </div>
+    <h2>{esc(region_label)} 코스별 참고 요금</h2>
+    <p class="muted">업체·코스에 따라 금액이 다를 수 있습니다. 상담 시 최종 안내해 드립니다.</p>
+    {pricing_cards(pricing, region_label)}
   </div>
 </section>
 {local_highlight_html(region_label, area_content)}
@@ -669,13 +736,15 @@ def render_area_page(
     </div>
   </div>
 </section>
-<section id="contact">
-  <div class="container">
-    <h2>📞 지금 바로 상담</h2>
-    <div class="card">
-      <p><strong>전화:</strong> <a href="tel:{site["phoneTel"]}" style="color:var(--accent);font-weight:950;text-decoration:none;">{site["phone"]}</a></p>
-      <p><strong>카카오톡:</strong> <a href="{site["kakao"]}" style="color:var(--accent);font-weight:950;text-decoration:none;">오픈채팅 바로가기</a></p>
-      <p class="muted">상담 시 "지역 + 코스/시간"을 알려주시면 더 빠르게 안내 가능합니다.</p>
+<section id="contact" class="contact-strip">
+  <div class="container contact-strip-inner">
+    <div class="contact-strip-info">
+      <h2>{esc(region_label)} 상담</h2>
+      <p class="muted" style="margin:0;">"{esc(short)} + 코스/시간"을 알려주시면 빠르게 안내합니다.</p>
+    </div>
+    <div class="contact-strip-actions">
+      <a href="tel:{site["phoneTel"]}" class="cta-btn">📞 {site["phone"]}</a>
+      <a href="{site["kakao"]}" class="cta-btn-outline" rel="noopener noreferrer">카카오톡</a>
     </div>
   </div>
 </section>
@@ -683,13 +752,13 @@ def render_area_page(
 <footer>
   <div class="container">
     <div class="foot-strong">{site["name"]}</div>
-    <div>{esc(region_label)} 출장마사지 · {site["phone"]} · 24시간</div>
+    <div>{esc(region_label)} 출장마사지 · {site["phone"]}</div>
     <div class="muted" style="margin-top:8px;">© 2026 {esc(site_host(site))}</div>
   </div>
 </footer>
 <div class="floating-btns">
-  <a href="tel:{site["phoneTel"]}" class="call-btn" aria-label="전화">전화</a>
-  <a href="{site["kakao"]}" class="kakao-btn" aria-label="카카오톡"><img src="{site["kakaoIcon"]}" alt="카카오톡" loading="lazy"></a>
+  <a href="tel:{site["phoneTel"]}" class="call-btn" aria-label="전화">📞 전화</a>
+  <a href="{site["kakao"]}" class="kakao-btn" aria-label="카카오톡"><img src="{site["kakaoIcon"]}" alt="">카톡</a>
 </div>
 <script src="js/common.js"></script>
 {SHOP_SCRIPTS}
@@ -713,7 +782,6 @@ def render_metro_hub(site: dict, metro: dict) -> str:
   <meta name="description" content="{esc(meta_desc)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="{canonical}">
-  <link rel="preload" as="image" href="{site["heroImage"]}" fetchpriority="high">
 {og_head_tags(site, page_title, meta_desc, canonical)}
   <link rel="stylesheet" href="css/common.css">
   {SHOP_CSS}
@@ -729,8 +797,7 @@ def render_metro_hub(site: dict, metro: dict) -> str:
         <div class="brand"><a href="index.html">{site["name"]}</a></div>
         <div class="sub">{esc(label)} · 시·구별 안내</div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <button class="toggle-btn" onclick="toggleMode()" aria-label="다크/라이트">🌙/☀</button>
+      <div class="header-actions">
         <a href="tel:{site["phoneTel"]}" class="cta">전화문의</a>
       </div>
     </div>
@@ -739,27 +806,19 @@ def render_metro_hub(site: dict, metro: dict) -> str:
 {region_selector_html(metro["id"], "")}
 {site_top_close()}
 <main>
-<section class="hero">
-  <img src="{site["heroImage"]}" alt="{esc(label)}" class="hero-bg" width="1200" height="800" loading="eager" fetchpriority="high">
-  <div class="hero-content">
-    <h1>{esc(label)} · 시·구 전지역 24시간</h1>
-    <p>{esc(label)} 전 지역 · 후불제 · 전문 테라피스트</p>
-    <a href="tel:{site["phoneTel"]}" class="cta-btn">지금 전화 상담</a>
-    <div class="phone-display">📞 {site["phone"]}</div>
-  </div>
-</section>
-{shop_section_html(metro["name"], metro["name"], "", metro["id"], "", cards_title=f"💆 {esc(label)} 업체")}
+{shop_section_html(metro["name"], metro["name"], "", metro["id"], "", cards_title=f"{esc(label)} 출장마사지 업체")}
+{hero_split_html(site, f"{label} · 시·구 전지역", f"{label} 각 구·시별 업체와 상세 안내를 확인하세요.", tags=["업체 비교", "24시간"], image_alt=label)}
 </main>
 <footer>
   <div class="container">
     <div class="foot-strong">{site["name"]}</div>
-    <div>{esc(label)} · {site["phone"]} · 24시간</div>
+    <div>{esc(label)} · {site["phone"]}</div>
     <div class="muted" style="margin-top:8px;">© 2026 {esc(site_host(site))}</div>
   </div>
 </footer>
 <div class="floating-btns">
-  <a href="tel:{site["phoneTel"]}" class="call-btn">전화</a>
-  <a href="{site["kakao"]}" class="kakao-btn"><img src="{site["kakaoIcon"]}" alt="카카오톡"></a>
+  <a href="tel:{site["phoneTel"]}" class="call-btn">📞 전화</a>
+  <a href="{site["kakao"]}" class="kakao-btn"><img src="{site["kakaoIcon"]}" alt="">카톡</a>
 </div>
 <script src="js/common.js"></script>
 {SHOP_SCRIPTS}
@@ -777,31 +836,45 @@ def index_area_links(metro: dict, limit: int | None = None) -> str:
     return "\n        ".join(items)
 
 
-def index_faq_json_ld() -> str:
-    faqs = [
+def index_area_grid_links(metro: dict, limit: int | None = None) -> str:
+    areas = metro["areas"][:limit] if limit else metro["areas"]
+    return "\n".join(
+        f'        <a href="{a["slug"]}.html">{esc(a["short"])}</a>' for a in areas
+    )
+
+
+def index_faq_items() -> list[tuple[str, str]]:
+    return [
         (
-            "서울·경기·인천 어디까지 출장마사지 방문이 가능한가요?",
-            "강남·마포·송파·분당·일산·송도·부평 등 수도권 시·구·동 단위로 방문 가능 여부를 상담해 드립니다. 자택, 호텔, 오피스텔 등 이용 장소를 알려주시면 가장 가까운 관리사를 배정합니다.",
+            "이 사이트는 어떤 출장마사지 정보를 제공하나요?",
+            "서울·경기·인천 수도권과 전국 주요 도시의 출장마사지 업체를 카드 형태로 비교할 수 있습니다. 각 업체의 코스, 가격대, 지역, 한줄 소개를 확인한 뒤 상세 페이지에서 리뷰와 연락처를 볼 수 있습니다.",
         ),
         (
-            "수도권 출장마사지 코스는 어떤 종류가 있나요?",
-            "타이마사지, 아로마, 스웨디시, 프리미엄 힐링 코스 등 목적에 맞는 코스를 선택할 수 있습니다. 60·90·120분 등 시간대별 가격은 상담 시 안내해 드립니다.",
+            "원하는 동네 업체는 어떻게 찾나요?",
+            "상단 지역·구 선택 메뉴에서 서울·경기·인천 등 원하는 지역을 고른 뒤 구·시를 선택하면 해당 지역 업체 카드만 필터링됩니다. 하단 지역 바로가기에서 구별 상세 페이지로 이동할 수도 있습니다.",
         ),
         (
-            "강남·홍대·잠실 등 서울 핫플레이스에서도 예약할 수 있나요?",
-            "네. 역삼·논현·홍대·합정·잠실·여의도 등 서울 주요 상권과 주거 지역 모두 예약 가능합니다. 구체적인 동·호수를 알려주시면 방문 시간을 조율합니다.",
+            "20대·30대 관리사 업체가 많은가요?",
+            "수도권을 중심으로 20·30대 관리사를 운영하는 업체가 다수 등록되어 있습니다. 업체 카드와 상세 페이지에서 코스·가격·지역 정보를 확인하세요.",
         ),
         (
-            "경기 신도시(동탄·판교·운정) 출장도 되나요?",
-            "동탄, 판교, 일산, 운정, 김포, 하남 미사 등 경기 주요 신도시와 외곽 지역까지 수도권 전역 커버가 가능합니다. 거리·시간에 따라 배정이 달라질 수 있어 미리 상담을 권장합니다.",
+            "예약은 어떤 순서로 진행되나요?",
+            "① 전화 또는 카카오톡으로 지역·시간·코스 문의 → ② 가능한 관리사 배정 안내 → ③ 자택·호텔·오피스텔 등 방문 장소 확인 → ④ 관리사 도착 후 코스 진행 및 결제 순서로 진행됩니다.",
         ),
         (
-            "인천 송도·영종도·청라에서도 이용할 수 있나요?",
-            "연수구 송도, 서구 청라·검단, 중구 영종·운서, 부평·남동 등 인천 전 지역 상담 및 예약이 가능합니다.",
+            "코스 종류와 가격은 어디서 확인하나요?",
+            "메인 페이지 코스 안내 카드에서 바디 릴렉스·스웨디시·시그니처 참고 요금을 확인할 수 있으며, 업체마다 세부 가격이 다를 수 있어 카드 클릭 후 상세 페이지 또는 상담을 통해 최종 금액을 확인하세요.",
+        ),
+        (
+            "블로그에는 어떤 내용이 있나요?",
+            "출장마사지 첫 이용 가이드, 코스별 차이, 스트레칭·피로 관리 팁 등 이용 전 궁금한 내용을 정리해 두었습니다. 메뉴의 블로그에서 무료로 열람할 수 있습니다.",
         ),
     ]
+
+
+def index_faq_json_ld() -> str:
     entities = []
-    for q, a in faqs:
+    for q, a in index_faq_items():
         entities.append(
             {
                 "@type": "Question",
@@ -816,108 +889,155 @@ def index_faq_json_ld() -> str:
     )
 
 
+def index_faq_accordion_html() -> str:
+    blocks = []
+    for q, a in index_faq_items():
+        blocks.append(
+            f"""
+    <details>
+      <summary>{esc(q)}</summary>
+      <p>{esc(a)}</p>
+    </details>"""
+        )
+    return "\n".join(blocks)
+
+
 def index_sudo_seo_html(metros: list, pricing: dict, site: dict) -> str:
     seoul = next(m for m in metros if m["id"] == "seoul")
     gyeonggi = next(m for m in metros if m["id"] == "gyeonggi")
     incheon = next(m for m in metros if m["id"] == "incheon")
-    price_block = pricing_tables(pricing, "수도권", "")
+    rates = pricing_cards(pricing, "기본")
+
+    def region_col(metro_label: str, metro: dict, hub_href: str) -> str:
+        grid = index_area_grid_links(metro)
+        return f"""
+      <div class="region-hub-col">
+        <h3>{esc(metro_label)}</h3>
+        <div class="region-grid">
+{grid}
+        </div>
+        <a href="{hub_href}" class="region-hub-more">{esc(metro_label)} 전체 보기 →</a>
+      </div>"""
+
     return f"""
-<section id="sudo-intro">
+<section id="intro" class="intro-band">
   <div class="container">
-    <h2>서울·경기·인천 수도권 출장마사지</h2>
-    <div class="card">
-      <p><strong>20대·30대 전문 테라피스트</strong>가 수도권 전역을 방문하는 출장마사지(출장안마) 서비스입니다. 강남 업무지구, 판교 테크밸리, 송도 국제도시, 일산·분당 주거 단지, 인천 공항 인근 호텔까지 <strong>24시간</strong> 상담·예약이 가능합니다.</p>
-      <p>서울 25개 자치구, 경기 주요 시·군, 인천 8개 구·군별로 <strong>지역 맞춤 페이지</strong>를 운영하고 있어 내 동네 키워드(예: 강남 출장마사지, 분당 출장마사지, 송도 출장마사지)로 검색해도 정확한 안내를 받을 수 있습니다.</p>
-      <p>장시간 앉아 있는 직장인, 야근 후 피로, 출장 중 호텔 투숙객, 육아로 몸이 뭉친 분들께 <strong>스웨디시·아로마·타이</strong> 코스로 맞춤 케어를 제공합니다. 전화 한 통이면 관리사 배정부터 방문 시간까지 빠르게 안내해 드립니다.</p>
+    <h2>수도권 출장마사지 — 업체 비교·예약 허브</h2>
+    <p class="muted">단순 안내 페이지가 아니라, 지역별 업체를 직접 비교하고 상세 정보까지 확인할 수 있는 플랫폼입니다.</p>
+    <div class="intro-grid">
+      <div class="intro-item">
+        <strong>업체 카드 비교</strong>
+        <p>가격·평점·지역·코스 태그를 한눈에 보고 클릭 한 번으로 상세 페이지 이동</p>
+      </div>
+      <div class="intro-item">
+        <strong>구·시 단위 필터</strong>
+        <p>강남·분당·송도·일산 등 원하는 행정구역 업체만 골라 볼 수 있는 지역 선택기</p>
+      </div>
+      <div class="intro-item">
+        <strong>블로그 &amp; 가이드</strong>
+        <p>첫 이용자를 위한 코스 설명, 예약 팁, 피로 관리 콘텐츠를 함께 제공</p>
+      </div>
     </div>
   </div>
 </section>
-<section id="seoul-areas">
+<section id="process">
   <div class="container">
-    <h2>📍 서울 출장마사지 — 구별 바로가기</h2>
-    <div class="card">
-      <p class="muted">강남·서초·송파·마포·용산·영등포 등 서울 전 구 방문. 아래에서 구를 선택하면 동네별 상세 안내를 볼 수 있습니다.</p>
-      <ul class="region-list">
-        {index_area_links(seoul)}
-        <li><a href="seoul.html">서울 전체 보기</a></li>
-      </ul>
+    <h2>예약부터 케어까지 — 4단계</h2>
+    <ol class="process-steps">
+      <li>
+        <span class="step-num">01</span>
+        <h3>업체 탐색</h3>
+        <p>카드에서 가격·지역·코스를 비교하고 마음에 드는 업체 상세 페이지를 엽니다.</p>
+      </li>
+      <li>
+        <span class="step-num">02</span>
+        <h3>상담 문의</h3>
+        <p>전화 또는 카카오톡으로 원하는 시간·장소·코스를 알려주시면 배정 가능 여부를 안내합니다.</p>
+      </li>
+      <li>
+        <span class="step-num">03</span>
+        <h3>관리사 방문</h3>
+        <p>자택·호텔·오피스텔 등 지정한 장소로 관리사가 방문합니다. 이동할 필요가 없습니다.</p>
+      </li>
+      <li>
+        <span class="step-num">04</span>
+        <h3>케어 &amp; 결제</h3>
+        <p>코스 진행 후 결제합니다. 현금·이체·카드 등 방법은 상담 시 안내드립니다.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+<section id="regions" class="region-hub">
+  <div class="container">
+    <h2>서울 · 경기 · 인천 — 구·시별 바로가기</h2>
+    <p class="muted">아래에서 구·시를 선택하면 해당 지역 상세 안내 페이지로 이동합니다.</p>
+    <div class="region-hub-cols">
+{region_col("서울", seoul, "seoul.html")}
+{region_col("경기", gyeonggi, "gyeonggi.html")}
+{region_col("인천", incheon, "incheon.html")}
     </div>
   </div>
 </section>
-<section id="gyeonggi-areas">
+<section id="rates">
   <div class="container">
-    <h2>📍 경기 출장마사지 — 시·군별 바로가기</h2>
-    <div class="card">
-      <p class="muted">수원, 성남·분당, 고양·일산, 용인, 부천, 화성·동탄, 파주·운정 등 경기 주요 도시 전역 커버.</p>
-      <ul class="region-list">
-        {index_area_links(gyeonggi)}
-        <li><a href="gyeonggi.html">경기 전체 보기</a></li>
-      </ul>
-    </div>
+    <h2>코스별 참고 요금</h2>
+    <p class="muted">업체·코스마다 금액이 다릅니다. 아래는 참고용 안내이며, 최종 금액은 카드 또는 상담으로 확인하세요.</p>
+    {rates}
   </div>
 </section>
-<section id="incheon-areas">
+<section id="faq" class="faq-accordion">
   <div class="container">
-    <h2>📍 인천 출장마사지 — 구·군별 바로가기</h2>
-    <div class="card">
-      <p class="muted">송도, 청라, 검단, 부평, 연수, 영종도·공항 인근 호텔까지 인천 전역 방문 가능.</p>
-      <ul class="region-list">
-        {index_area_links(incheon)}
-        <li><a href="incheon.html">인천 전체 보기</a></li>
-      </ul>
-    </div>
-  </div>
-</section>
-<section id="course">
-  <div class="container">
-    <h2>💆 수도권 출장마사지 코스·가격</h2>
-    <div class="card">
-      <p class="muted">목적과 피로도에 맞는 코스를 선택하세요. 정확한 금액·가능 시간은 상담 시 안내됩니다.</p>
-      {price_block}
-    </div>
-  </div>
-</section>
-<section id="why">
-  <div class="container">
-    <h2>수도권에서 출장마사지를 찾는 이유</h2>
-    <div class="card">
-      <h3>1. 이동 없이 받는 편의성</h3>
-      <p>강남·홍대·잠실 등 교통 체증이 심한 지역도 집·호텔에서 대기만 하면 됩니다. 늦은 밤·새벽에도 이동 부담 없이 이용할 수 있습니다.</p>
-      <h3>2. 지역별 맞춤 배정</h3>
-      <p>서울·경기·인천 각 구·동 단위로 서비스 가능 지역을 세분화해, 가장 가까운 테라피스트를 배정합니다.</p>
-      <h3>3. 20대·30대 전문 관리사</h3>
-      <p>젊고 숙련된 테라피스트가 스웨디시·아로마·타이 등 코스별 맞춤 시술을 진행합니다.</p>
-      <h3>4. 호텔·오피스텔·자택 모두 OK</h3>
-      <p>출장·여행 중 호텔, 재택근무 공간, 일반 자택 등 이용 장소에 맞춰 방문합니다.</p>
-    </div>
-  </div>
-</section>
-<section id="faq">
-  <div class="container">
-    <h2>❓ 수도권 출장마사지 FAQ</h2>
-    <div class="card">
-      <h3>서울·경기·인천 어디까지 방문 가능한가요?</h3>
-      <p>강남·마포·송파·분당·일산·송도·부평 등 수도권 시·구·동 단위로 상담 후 배정합니다.</p>
-      <h3>어떤 코스를 선택하면 좋을까요?</h3>
-      <p>근육 뭉침·피로 회복은 스웨디시, 향기·이완은 아로마, 옷 입은 채 스트레칭은 타이마사지를 추천합니다.</p>
-      <h3>강남·홍대·잠실 등 핫플레이스에서도 예약되나요?</h3>
-      <p>네. 서울 주요 상권·주거 지역 모두 예약 가능합니다.</p>
-      <h3>경기 신도시(동탄·판교·운정)도 되나요?</h3>
-      <p>동탄, 판교, 일산, 운정, 김포, 하남 미사 등 경기 전역 상담 가능합니다.</p>
-      <h3>인천 송도·영종도에서도 이용할 수 있나요?</h3>
-      <p>송도, 청라, 검단, 영종·운서, 부평 등 인천 전 지역 예약 가능합니다.</p>
-    </div>
+    <h2>자주 묻는 질문</h2>
+    {index_faq_accordion_html()}
   </div>
 </section>
 """
 
 
+def index_nationwide_html(metros: list) -> str:
+    capital_ids = {"seoul", "gyeonggi", "incheon"}
+    others = [m for m in metros if m["id"] not in capital_ids]
+    links = "\n".join(
+        f'      <a href="{m["id"]}.html">{esc(m["name"])} 출장마사지</a>'
+        for m in others
+    )
+    return f"""
+<section id="nationwide" class="intro-band">
+  <div class="container">
+    <h2>전국 다른 지역 업체</h2>
+    <p class="muted">메인 상단에는 수도권(서울·경기·인천) 업체만 모았습니다. 부산·대구·제주 등 전국 업체는 아래에서 지역별로 확인하세요.</p>
+    <div class="region-grid region-grid--wide">
+{links}
+    </div>
+  </div>
+</section>"""
+
+
 def render_index(site: dict, metros: list, pricing: dict) -> str:
     canonical = f"{site['domain']}/"
-    page_title = "서울·경기·인천 출장마사지｜20대, 30대 - 24시 출장안마"
-    meta_desc = "서울·경기·인천 수도권 출장마사지. 강남·분당·송도·일산 등 시·구별 24시간 방문, 20·30대 전문 테라피스트, 스웨디시·아로마·타이 코스. 전화·카톡 즉시 상담."
+    page_title = "힐링 출장마사지 | 서울·경기·인천 업체 비교·예약"
+    meta_desc = "서울·경기·인천 수도권 출장마사지 업체를 카드로 비교하고 예약하세요. 20·30대 관리사, 구·시별 필터, 코스·가격·리뷰 상세 안내. 전화·카톡 즉시 상담."
     faq_ld = index_faq_json_ld()
     sudo_seo = index_sudo_seo_html(metros, pricing, site)
+    nav = site_nav_html(
+        [
+            ("#shops", "업체"),
+            ("#intro", "소개"),
+            ("#process", "이용절차"),
+            ("#nationwide", "전국"),
+            ("#rates", "요금"),
+            ("blog.html", "블로그"),
+            ("#contact", "문의"),
+        ]
+    )
+    hero = hero_split_html(
+        site,
+        "서울·경기·인천 출장마사지 업체를 한곳에서",
+        "강남·분당·송도·일산 등 수도권 전역 업체를 카드로 비교하고, 코스·가격·리뷰를 확인한 뒤 바로 상담하세요.",
+        tags=["업체 비교", "구·시 필터", "20·30대", "24시간 상담"],
+        image_alt="수도권 힐링 출장마사지",
+    )
+    nationwide = index_nationwide_html(metros)
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -926,8 +1046,8 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
   <title>{esc(page_title)}</title>
   <meta name="description" content="{esc(meta_desc)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#0c1222">
   <link rel="canonical" href="{canonical}">
-  <link rel="preload" as="image" href="{site["heroImage"]}" fetchpriority="high">
 {og_head_tags(site, page_title, meta_desc, canonical)}
   <link rel="stylesheet" href="css/common.css">
   {SHOP_CSS}
@@ -941,48 +1061,41 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
     <div class="header-inner">
       <div>
         <div class="brand">{site["name"]}</div>
-        <div class="sub">서울·경기·인천 수도권 출장마사지 · 24시간 · 20·30대 전문관리</div>
+        <div class="sub">수도권 업체 비교 · 구·시별 안내 · 24시간 상담</div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <button class="toggle-btn" onclick="toggleMode()" aria-label="다크/라이트">🌙/☀</button>
+      <div class="header-actions">
         <a href="tel:{site["phoneTel"]}" class="cta">전화문의</a>
       </div>
     </div>
+    {nav}
   </div>
 </header>
 {region_selector_html("", "")}
 {site_top_close()}
 <main>
-<section class="hero">
-  <img src="{site["heroImage"]}" alt="서울·경기·인천 수도권 출장마사지" class="hero-bg" width="1200" height="800" loading="eager" fetchpriority="high">
-  <div class="hero-content">
-    <h1>서울·경기·인천 출장마사지 · 24시 출장안마</h1>
-    <p>강남·분당·송도·일산 등 수도권 전역 · 자택·호텔·오피스텔 · 20·30대 전문 테라피스트</p>
-    <a href="tel:{site["phoneTel"]}" class="cta-btn">지금 전화 상담하기</a>
-    <div class="phone-display">📞 {site["phone"]}</div>
-    <div class="badges">
-      <span>24시간</span><span>수도권전지역</span><span>20·30대</span><span>즉시상담</span>
-    </div>
-  </div>
-</section>
-{shop_section_html("수도권", "", "", "", "", cards_title="💆 수도권 출장마사지 업체")}
+{shop_section_html("수도권", "", "", "", "", cards_title="수도권 출장마사지 업체", capital_only=True, section_note="서울·경기·인천 수도권 업체만 표시합니다. 전국 다른 지역은 아래 전국 안내에서 확인하세요.")}
+{hero}
+{nationwide}
 {sudo_seo}
 <section id="blog-link">
   <div class="container">
-    <h2>📝 출장마사지 블로그</h2>
-    <div class="card">
-      <p>마사지 이용 가이드, 코스 비교, 예약 팁 등 유용한 정보를 블로그에서 확인하세요.</p>
-      <p style="margin-top:12px;"><a href="blog.html" class="cta-btn" style="display:inline-block;text-decoration:none;">블로그 보기</a>
-      <a href="blog-write.html" style="margin-left:10px;color:var(--accent);font-weight:700;">글 작성</a></p>
-    </div>
+    <h2>출장마사지 이용 가이드 · 블로그</h2>
+    <p class="muted">코스 차이, 첫 예약 팁, 피로 관리 등 실용 정보를 정리했습니다.</p>
+    <p style="margin-top:14px;">
+      <a href="blog.html" class="cta-btn" style="text-decoration:none;">블로그 읽기</a>
+      <a href="blog-write.html" style="margin-left:12px;color:var(--accent);font-weight:700;text-decoration:none;">글 작성</a>
+    </p>
   </div>
 </section>
-<section id="contact">
-  <div class="container">
-    <h2>📞 지금 바로 상담</h2>
-    <div class="card">
-      <p><strong>전화:</strong> <a href="tel:{site["phoneTel"]}" style="color:var(--accent);font-weight:950;text-decoration:none;">{site["phone"]}</a></p>
-      <p><strong>카카오톡:</strong> <a href="{site["kakao"]}" style="color:var(--accent);font-weight:950;text-decoration:none;">오픈채팅 바로가기</a></p>
+<section id="contact" class="contact-strip">
+  <div class="container contact-strip-inner">
+    <div class="contact-strip-info">
+      <h2>지금 상담하기</h2>
+      <p class="muted" style="margin:0;">지역·시간·코스를 알려주시면 빠르게 안내해 드립니다.</p>
+    </div>
+    <div class="contact-strip-actions">
+      <a href="tel:{site["phoneTel"]}" class="cta-btn">📞 {site["phone"]}</a>
+      <a href="{site["kakao"]}" class="cta-btn-outline" rel="noopener noreferrer">카카오톡 상담</a>
     </div>
   </div>
 </section>
@@ -990,13 +1103,13 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
 <footer>
   <div class="container">
     <div class="foot-strong">{site["name"]}</div>
-    <div>서울·경기·인천 출장마사지 · {site["phone"]} · 24시간</div>
+    <div>서울·경기·인천 출장마사지 업체 비교 · {site["phone"]}</div>
     <div class="muted" style="margin-top:8px;">© 2026 {esc(site_host(site))}</div>
   </div>
 </footer>
 <div class="floating-btns">
-  <a href="tel:{site["phoneTel"]}" class="call-btn">전화</a>
-  <a href="{site["kakao"]}" class="kakao-btn"><img src="{site["kakaoIcon"]}" alt="카카오톡"></a>
+  <a href="tel:{site["phoneTel"]}" class="call-btn" aria-label="전화">📞 전화 상담</a>
+  <a href="{site["kakao"]}" class="kakao-btn" aria-label="카카오톡"><img src="{site["kakaoIcon"]}" alt="">카톡</a>
 </div>
 <script src="js/common.js"></script>
 {SHOP_SCRIPTS}
@@ -1065,8 +1178,6 @@ def render_shop_detail(site: dict) -> str:
         <div class="brand"><a href="index.html">{esc(name)}</a></div>
         <div class="sub">출장마사지 업체 상세</div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button class="toggle-btn" onclick="toggleMode()" aria-label="다크/라이트">🌙/☀</button>
       </div>
     </div>
   </div>

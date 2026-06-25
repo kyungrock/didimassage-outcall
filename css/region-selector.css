@@ -6,15 +6,15 @@
 }
 
 .region-selector-bar {
-  background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
-  border-bottom: 3px solid var(--accent);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-  padding: 18px 0;
+  background: var(--surface);
+  border-bottom: 2px solid var(--brand);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 14px 0;
 }
 
 .light-mode .region-selector-bar {
-  background: linear-gradient(135deg, #f8f9fb 0%, #eef1f5 100%);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* 모바일: 선택 후 한 줄 요약 (기본 숨김, 데스크톱에서도 숨김) */
@@ -54,7 +54,7 @@
   color: var(--accent);
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(0, 173, 239, 0.12);
+  background: var(--accent-soft);
 }
 
 .region-selector-inner {

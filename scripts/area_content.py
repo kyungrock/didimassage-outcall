@@ -207,37 +207,52 @@ def _dong_pair(area: dict) -> tuple[str, str, str]:
 
 def _build_highlights(metro: dict, area: dict, slug: str) -> list[str]:
     if slug in HIGHLIGHTS:
-        return HIGHLIGHTS[slug]
+        base = list(HIGHLIGHTS[slug])
+    else:
+        short = area.get("short", area["name"])
+        name = area["name"]
+        metro_name = metro["name"]
+        d1, d2, d3 = _dong_pair(area)
+        idx = _slug_hash(slug) % 5
+
+        pools = [
+            [
+                f"{metro_name} {name} {d1}·{d2} 일대 호텔·오피스텔·자택으로 관리사가 직접 찾아갑니다. {short} 생활권 특성에 맞춰 배차해 대기 시간을 줄입니다.",
+                f"{d3}·{d1} 인근 숙박·주거 단지에서 당일·야간 방문 문의가 많으며, 전화·카톡 상담 후 일정을 안내해 드립니다.",
+            ],
+            [
+                f"{short} {d1} 거주지와 {d2} 상권 인근 오피스텔까지 {metro_name} {name} 전역 방문이 가능합니다. 샵 이동 없이 머무는 공간에서 케어를 받는 방문형 서비스입니다.",
+                f"{d2}·{d3} 일대에서 퇴근 후·주말 당일 예약 문의가 이어지며, 코스·시간은 상담 시 맞춰 조율합니다.",
+            ],
+            [
+                f"{name} {d1}·{d2}·{d3} 등 {short} 핵심 동네 호텔·펜션·자택 방문에 맞춰 운영합니다. {metro_name} 기준 신속 배정을 안내해 드립니다.",
+                f"{short} 역세권·주거 단지에서 24시간 전화·카톡 상담 후 바디 릴렉스·스웨디시·시그니처 코스 중 선택할 수 있습니다.",
+            ],
+            [
+                f"{metro_name} {short} {d1} 인근 비즈니스 호텔과 {d2} 주거지까지 출장 동선을 최적화합니다. 출장·재택·여행 중에도 이동 부담 없이 이용하세요.",
+                f"{d3} 일대 장기체류·출장 고객과 지역 거주민 모두 {name} 전지역 상담이 가능합니다.",
+            ],
+            [
+                f"{short} {d1}·{d3} 상권과 {d2} 주택가 등 {name} 생활권에 맞춰 관리사를 배정합니다. 지역별 이동 패턴을 반영해 방문 시간을 안내합니다.",
+                f"{metro_name} {name} 호텔·오피스텔·자택 어디든 상담 가능하며, 컨디션에 맞는 코스를 추천해 드립니다.",
+            ],
+        ]
+        base = pools[idx]
 
     short = area.get("short", area["name"])
     name = area["name"]
     metro_name = metro["name"]
-    d1, d2, d3 = _dong_pair(area)
-    idx = _slug_hash(slug) % 5
-
-    pools = [
-        [
-            f"{metro_name} {name} {d1}·{d2} 일대 호텔·오피스텔·자택으로 관리사가 직접 방문합니다. {short} 지역 특성에 맞춰 배차해 대기 시간을 줄입니다.",
-            f"{d3}·{d1} 인근 숙박·주거 단지에서 당일·야간 출장 문의가 많으며, 전화·카톡 상담 후 빠르게 일정을 안내해 드립니다.",
-        ],
-        [
-            f"{short} {d1} 거주지와 {d2} 상권 인근 오피스텔까지 {metro_name} {name} 전역 출장이 가능합니다. 머무시는 장소로 찾아가는 방문형 서비스입니다.",
-            f"{d2}·{d3} 일대에서 퇴근 후·주말 당일 예약 문의가 이어지며, 후불제로 부담 없이 이용하실 수 있습니다.",
-        ],
-        [
-            f"{name} {d1}·{d2}·{d3} 등 {short} 핵심 동네 호텔·펜션·자택 방문에 특화되어 있습니다. {metro_name} 기준 신속 배정을 안내해 드립니다.",
-            f"{short} 신도시·역세권 오피스텔과 주거 단지에서 24시간 전화·카톡 상담 후 코스·시간을 맞춰 예약할 수 있습니다.",
-        ],
-        [
-            f"{metro_name} {short} {d1} 인근 비즈니스 호텔과 {d2} 주거지까지 출장 동선을 최적화합니다. 이동 없이 머무는 공간에서 케어를 받으세요.",
-            f"{d3} 일대 장기체류·출장 고객과 지역 거주민 모두 {name} 전지역 상담이 가능합니다.",
-        ],
-        [
-            f"{short} {d1}·{d3} 상권과 {d2} 주택가 등 {name} 생활권에 맞춰 관리사를 배정합니다. 지역별 이동 패턴을 반영해 방문 시간을 안내합니다.",
-            f"{metro_name} {name} 호텔·오피스텔·자택 어디든 상담 가능하며, 건식·힐링·프리미엄 코스 중 컨디션에 맞는 코스를 추천해 드립니다.",
-        ],
+    d1, d2, _ = _dong_pair(area)
+    tidx = _slug_hash(slug + "t") % 4
+    third_lines = [
+        f"이 페이지는 {metro_name} {name}({short}) 전용 안내입니다. 업체 카드에서 {short} 배정 가능 업체·코스·가격을 비교한 뒤 상담하세요.",
+        f"{short} {d1}·{d2} 키워드로 검색하셨다면, 아래 업체 목록과 지역 맞춤 안내를 함께 참고하시면 됩니다.",
+        f"{name} 인근 호텔·오피스텔·자택 이용 고객은 상담 시 동·건물명을 알려주시면 {short} 기준 방문 시간을 더 정확히 안내합니다.",
+        f"{metro_name} {short} 지역은 업체마다 커버 범위가 다를 수 있습니다. 카드의 지역·가격 정보를 확인하고 전화·카톡으로 최종 확인하세요.",
     ]
-    return pools[idx]
+    if len(base) >= 3:
+        return base[:3]
+    return base + [third_lines[tidx]]
 
 
 def _why_titles(short: str, region_label: str, slug: str) -> list[str]:
@@ -291,7 +306,7 @@ def why_bodies(
             f"{region_label} 호텔·펜션·자택·오피스텔로 관리사가 직접 방문합니다. 샵까지 이동할 필요 없이 편한 공간에서 케어를 받을 수 있습니다.",
             f"24시간 전화·카톡 상담으로 {region_label} 기준 빠른 배정이 가능합니다. 퇴근 후, 여행 중, 갑작스러운 피로가 쌓였을 때도 부담 없이 문의하세요.",
             "관리사 도착·코스 확인 후 결제하는 후불제로 운영됩니다. 현금·계좌이체·카드 등 결제 방법은 상담 시 안내해 드립니다.",
-            f"건식·아로마·힐링(스웨디시) 등 원하시는 강도와 부위에 맞춰 코스를 안내합니다. {dong_hint} 등 {region_label} 전지역에서 이용하실 수 있습니다.",
+            f"바디 릴렉스·스웨디시·시그니처 등 원하시는 강도와 부위에 맞춰 코스를 안내합니다. {dong_hint} 등 {region_label} 전지역에서 이용하실 수 있습니다.",
         ],
         [
             f"{region_label} 머무시는 숙소·거주지로 찾아가는 방문형 출장입니다. 외출·대기 없이 제한된 시간을 효율적으로 쓸 수 있습니다.",
@@ -303,7 +318,7 @@ def why_bodies(
             f"출장·여행·야근 후 {region_label} 호텔·오피스텔에서 그대로 이용할 수 있습니다. 이동 피로 없이 휴식과 동시에 관리를 받으세요.",
             "24시간 운영 상담으로 늦은 시간 예약도 가능합니다. 배정 상황에 따라 방문 시각을 안내해 드립니다.",
             f"{region_label} 전 지역 후불제 운영으로 안심하고 예약하실 수 있습니다. 결제 수단은 상담 시 확인하세요.",
-            f"건식 테라피부터 힐링·프리미엄 코스까지 {region_label}({dong_hint}) 상황에 맞게 선택할 수 있습니다.",
+            f"바디 릴렉스부터 스웨디시·시그니처 코스까지 {region_label}({dong_hint}) 상황에 맞게 선택할 수 있습니다.",
         ],
     ]
     return bodies[idx][:count]
@@ -354,19 +369,19 @@ def course_heading(prefix: str, key: str, course_name: str, slug: str) -> str:
     """가격표 H3 — 지역 키워드 + 코스명 변주"""
     labels = {
         "A": [
-            f"{prefix} 출장 건식·시원 테라피",
-            f"{prefix} 지역 건식 출장 코스",
-            f"{prefix} 맞춤 건식 출장마사지",
+            f"{prefix} 바디 릴렉스 출장",
+            f"{prefix} 지역 스트레칭·건식 출장",
+            f"{prefix} 라이트 바디케어 출장",
         ],
         "B": [
-            f"{prefix} 힐링 스웨디시 출장",
-            f"{prefix} 감성 힐링 출장 코스",
             f"{prefix} 스웨디시·아로마 출장",
+            f"{prefix} 감성 힐링 출장 코스",
+            f"{prefix} 스탠다드 힐링 출장",
         ],
         "C": [
-            f"{prefix} 프리미엄 출장 관리",
-            f"{prefix} VVIP 프리미엄 출장",
-            f"{prefix} 특급 프리미엄 출장 코스",
+            f"{prefix} VIP 시그니처 출장",
+            f"{prefix} 시그니처 프리미엄 출장",
+            f"{prefix} 특급 시그니처 출장 코스",
         ],
     }
     idx = _slug_hash(slug + key) % 3

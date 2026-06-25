@@ -42,7 +42,7 @@ def og_head_tags(
     image: str | None = None,
     og_type: str = "website",
 ) -> str:
-    img = image or site.get("heroImage", "/img/model-1.png")
+    img = image or site.get("heroImage", "/img/hero-brand.svg")
     if img.startswith("/"):
         img = site["domain"] + img
     name = esc_attr(site["name"])
@@ -65,7 +65,7 @@ def json_ld_website(site: dict) -> str:
         "@type": "WebSite",
         "name": site["name"],
         "url": site["domain"] + "/",
-        "description": "전국 시·구별 출장마사지 24시간 후불제 안내",
+        "description": "전국 시·구별 출장마사지 업체 비교·지역 안내 플랫폼",
         "inLanguage": "ko-KR",
         "publisher": {
             "@type": "Organization",
@@ -96,7 +96,7 @@ def json_ld_local_business(
         "name": site["name"],
         "url": page_url,
         "telephone": schema_telephone(site["phone"]),
-        "image": site["domain"] + site.get("heroImage", "/img/model-1.png"),
+        "image": site["domain"] + site.get("heroImage", "/img/hero-brand.svg"),
         "priceRange": "₩₩",
         "areaServed": region_label,
         "address": addr,

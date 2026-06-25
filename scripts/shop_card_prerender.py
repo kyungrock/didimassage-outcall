@@ -153,9 +153,25 @@ def district_serves_page(shop: dict, page_region: str, page_district: str) -> bo
     return False
 
 
+CAPITAL_REGIONS = ("서울", "경기", "인천")
+
+
+def is_capital_shop(shop: dict) -> bool:
+    region = shop.get("region", "") or ""
+    return any(region_tokens_match(region, name) for name in CAPITAL_REGIONS)
+
+
 def filter_shops(
-    cards: list[dict], page_region: str, page_district: str = ""
+    cards: list[dict], page_region: str, page_district: str = "", *, capital_only: bool = False
 ) -> list[dict]:
+    if capital_only:
+        filtered = [
+            shop
+            for shop in cards
+            if (not shop.get("type") or shop.get("type") == "출장마사지")
+            and is_capital_shop(shop)
+        ]
+        return dedupe_shops(filtered)
     filtered = [
         shop
         for shop in cards
@@ -183,7 +199,7 @@ def dedupe_shops(shops: list[dict]) -> list[dict]:
 
 def resolve_image(src: str) -> str:
     if not src:
-        return "img/model-1.png"
+        return "images/placeholder-shop.jpg"
     if re.match(r"^https?://msg1000\.com/images/", src, re.I):
         src = re.sub(r"^https?://msg1000\.com/", "", src, flags=re.I)
     if src.startswith("http"):
@@ -279,9 +295,13 @@ def render_shop_cards_grid(
     page_region: str,
     page_district: str = "",
     display_label: str = "",
+    *,
+    capital_only: bool = False,
 ) -> tuple[str, int]:
     cards = load_shop_cards()
-    shops = filter_shops(cards, page_region, page_district)
+    shops = filter_shops(
+        cards, page_region, page_district, capital_only=capital_only
+    )
     if not shops:
         label = display_label or page_district or page_region or "전국"
         return (

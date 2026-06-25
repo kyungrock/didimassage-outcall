@@ -72,7 +72,7 @@
   }
 
   function resolveImage(src) {
-    if (!src) return "img/model-1.png";
+    if (!src) return "images/placeholder-shop.jpg";
     if (/^https?:\/\/msg1000\.com\/images\//i.test(src)) {
       src = src.replace(/^https?:\/\/msg1000\.com\//i, "");
     }
@@ -87,7 +87,13 @@
     return "★".repeat(Math.min(5, r)) + "☆".repeat(Math.max(0, 5 - r));
   }
 
-  function filterShops(pageRegion, pageDistrict) {
+  function isCapitalShop(shop) {
+    return ["서울", "경기", "인천"].some((name) =>
+      regionTokensMatch(shop.region, name)
+    );
+  }
+
+  function filterShops(pageRegion, pageDistrict, capitalOnly) {
     const data = Array.isArray(window.outcallShopCardData)
       ? window.outcallShopCardData
       : [];
@@ -95,6 +101,7 @@
 
     return data.filter((shop) => {
       if (shop.type && shop.type !== "출장마사지") return false;
+      if (capitalOnly && !isCapitalShop(shop)) return false;
       if (!regionTokensMatch(shop.region, pageRegion)) return false;
       return districtServesPage(shop, pageRegion, pageDistrict);
     });
@@ -158,7 +165,7 @@
     img.decoding = "async";
     img.onerror = function () {
       this.onerror = null;
-      this.src = "img/model-1.png";
+      this.src = "images/placeholder-shop.jpg";
     };
     imageWrap.appendChild(img);
 
@@ -225,7 +232,8 @@
     const pageRegion = section.dataset.region || "";
     const pageDistrict = section.dataset.district || "";
     const displayLabel = section.dataset.regionLabel || "";
-    const cacheKey = [pageRegion, pageDistrict].join("|");
+    const capitalOnly = section.dataset.capitalOnly === "true";
+    const cacheKey = [pageRegion, pageDistrict, capitalOnly ? "capital" : ""].join("|");
 
     if (
       grid.dataset.renderedFor === cacheKey &&
@@ -236,9 +244,9 @@
       return;
     }
 
-    let shops = dedupeShops(filterShops(pageRegion, pageDistrict));
+    let shops = dedupeShops(filterShops(pageRegion, pageDistrict, capitalOnly));
 
-    if (!shops.length && !pageRegion) {
+    if (!shops.length && !pageRegion && !capitalOnly) {
       shops = dedupeShops(
         (window.outcallShopCardData || []).filter(
           (s) => !s.type || s.type === "출장마사지"
