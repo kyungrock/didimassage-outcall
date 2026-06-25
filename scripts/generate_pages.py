@@ -510,17 +510,30 @@ def resolve_area_layout(
     parent_area: dict | None = None,
 ) -> tuple[str, str]:
     """지역별 pageType·theme — JSON 명시값 우선, 없으면 수도권 집계/기타 안내형 규칙."""
-    page_type = area.get("pageType")
-    theme = area.get("theme")
-    if page_type and theme:
-        return page_type, theme
-    if parent_area and not page_type:
-        return resolve_area_layout(parent_area, metro, None)
+    if area.get("pageType") and area.get("theme"):
+        return area["pageType"], area["theme"]
 
-    slug = area.get("slug", "")
-    if metro["id"] in AGGREGATION_METRO_IDS or slug in AGGREGATION_SLUGS:
-        return "aggregation", "modern"
-    return "service-guide", "warm"
+    if parent_area and not area.get("pageType"):
+        page_type, _ = resolve_area_layout(parent_area, metro, None)
+    elif area.get("pageType"):
+        page_type = area["pageType"]
+    else:
+        slug = area.get("slug", "")
+        if metro["id"] in AGGREGATION_METRO_IDS or slug in AGGREGATION_SLUGS:
+            page_type = "aggregation"
+        else:
+            page_type = "service-guide"
+
+    if area.get("theme"):
+        theme = area["theme"]
+    elif metro["id"] == "gyeonggi":
+        theme = "modern"
+    elif page_type == "aggregation":
+        theme = "modern"
+    else:
+        theme = "warm"
+
+    return page_type, theme
 
 
 def theme_css_link(theme: str) -> str:
@@ -742,7 +755,7 @@ def shop_section_html(
         if page_type == "aggregation":
             section_note = "가격·코스·평점을 비교하고 카드를 클릭하면 상세 페이지로 이동합니다."
         elif page_type == "service-guide":
-            section_note = "위 안내를 확인하신 뒤, 아래에서 원하는 업체를 선택하세요."
+            section_note = "카드를 클릭하면 코스·가격·리뷰를 확인할 수 있습니다. 아래에서 지역 안내·이용 절차도 참고하세요."
         else:
             section_note = "카드를 클릭하면 코스·가격·리뷰 등 상세 정보를 확인할 수 있습니다."
     note_html = f'<p class="muted">{esc(section_note)}</p>'
@@ -889,7 +902,8 @@ def build_area_main_sections(
 {map_sec}
 {contact_sec}"""
     if page_type == "service-guide":
-        return f"""{hero}
+        return f"""{shops}
+{hero}
 {local_sec}
 {why_sec}
 {process_sec}
@@ -897,7 +911,6 @@ def build_area_main_sections(
 {notes_sec}
 {faq_sec}
 {price}
-{shops}
 {area_sec}
 {map_sec}
 {contact_sec}"""
