@@ -162,11 +162,18 @@
     return prefix + " 출장마사지 " + name + " - 24시간 후불, " + price;
   }
 
+  function parsePriceMin(price) {
+    const raw = String(price || "").split("~")[0];
+    const digits = raw.replace(/[^\d]/g, "");
+    return digits ? parseInt(digits, 10) : 999999;
+  }
+
   function createCard(shop, displayLabel) {
     const link = document.createElement("a");
     link.className = "shop-card";
     link.href = buildDetailUrl(shop);
     link.setAttribute("aria-label", shop.name + " 상세보기");
+    link.setAttribute("data-price-min", String(parsePriceMin(shop.price)));
 
     const imageWrap = document.createElement("div");
     imageWrap.className = "shop-card-image-wrap";

@@ -1,0 +1,41 @@
+/* 강남 등 업체집계형 — 모던·심플 */
+body[data-theme="modern"] {
+  --bg: #080d18;
+  --surface: #0f1628;
+  --card: #121c30;
+  --brand: #06d6a0;
+  --brand-hover: #05b384;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.12);
+  --border: rgba(255, 255, 255, 0.08);
+  --radius: 10px;
+  --radius-lg: 14px;
+  --hero-grad: linear-gradient(145deg, #080d18 0%, #0f1a2e 50%, #132038 100%);
+}
+
+body[data-theme="modern"] .shop-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+body[data-theme="modern"] .shop-cards-section--aggregation {
+  background: linear-gradient(180deg, rgba(6, 214, 160, 0.06) 0%, transparent 100%);
+  padding-top: 8px;
+}
+
+body[data-theme="modern"] .hero-split--compact {
+  padding: 28px 0;
+}
+
+body[data-theme="modern"] .hero-split--compact .hero-art {
+  min-height: 200px;
+}
+
+body[data-theme="modern"] .shop-agg-toolbar {
+  border-color: rgba(6, 214, 160, 0.25);
+}
+
+body[data-theme="modern"] .shop-agg-btn.is-active {
+  background: var(--brand);
+  color: #041018;
+}

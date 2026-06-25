@@ -306,6 +306,7 @@ def hero_split_html(
     *,
     tags: list[str] | None = None,
     image_alt: str = "",
+    compact: bool = False,
 ) -> str:
     tags_html = ""
     if tags:
@@ -325,8 +326,9 @@ def hero_split_html(
     <figure class="hero-visual">
       <img src="{site["heroImage"]}" alt="{esc(alt)}" class="hero-photo" width="600" height="450" loading="eager" fetchpriority="high" decoding="async">
     </figure>"""
+    compact_class = " hero-split--compact" if compact else ""
     return f"""
-<section class="hero-split" aria-label="{esc(h1)}">
+<section class="hero-split{compact_class}" aria-label="{esc(h1)}">
   <div class="container hero-split-inner">
     <div class="hero-copy">
       <p class="hero-eyebrow">{esc(site["name"])}</p>
@@ -481,6 +483,161 @@ SHOP_SCRIPTS = """
 <script src="js/shop-card-data-outcall.js"></script>
 <script src="js/shop-cards.js"></script>
 <script src="js/region-selector.js"></script>"""
+AREA_PAGE_SCRIPT = '<script src="js/area-page.js"></script>'
+
+AGGREGATION_METRO_IDS = frozenset({"seoul", "incheon"})
+AGGREGATION_SLUGS = frozenset({
+    "gyeonggi-suwon",
+    "gyeonggi-seongnam",
+    "gyeonggi-goyang",
+    "gyeonggi-yongin",
+    "gyeonggi-bucheon",
+    "gyeonggi-ansan",
+    "gyeonggi-anyang",
+    "gyeonggi-hwaseong",
+    "gyeonggi-gwangmyeong",
+    "gyeonggi-guri",
+    "gyeonggi-hanam",
+    "busan-haeundae",
+    "busan-busanjin",
+    "busan-suyeong",
+})
+
+
+def resolve_area_layout(
+    area: dict,
+    metro: dict,
+    parent_area: dict | None = None,
+) -> tuple[str, str]:
+    """지역별 pageType·theme — JSON 명시값 우선, 없으면 수도권 집계/기타 안내형 규칙."""
+    page_type = area.get("pageType")
+    theme = area.get("theme")
+    if page_type and theme:
+        return page_type, theme
+    if parent_area and not page_type:
+        return resolve_area_layout(parent_area, metro, None)
+
+    slug = area.get("slug", "")
+    if metro["id"] in AGGREGATION_METRO_IDS or slug in AGGREGATION_SLUGS:
+        return "aggregation", "modern"
+    return "service-guide", "warm"
+
+
+def theme_css_link(theme: str) -> str:
+    if theme in ("modern", "warm"):
+        return f'  <link rel="stylesheet" href="css/themes/{theme}.css">'
+    return ""
+
+
+def theme_meta_color(theme: str) -> str:
+    return {"modern": "#0c1222", "warm": "#6b5344"}.get(theme, "#0c1222")
+
+
+def aggregation_toolbar_html() -> str:
+    return """
+    <div class="shop-agg-toolbar" role="toolbar" aria-label="업체 정렬">
+      <span class="shop-agg-label">정렬</span>
+      <button type="button" class="shop-agg-btn is-active" data-sort="default">기본</button>
+      <button type="button" class="shop-agg-btn" data-sort="price-asc">가격 낮은순</button>
+      <button type="button" class="shop-agg-btn" data-sort="price-desc">가격 높은순</button>
+    </div>"""
+
+
+def process_section_html(region_label: str) -> str:
+    steps = [
+        ("지역·시간 알려주기", "동네(운정·금촌 등)와 원하는 시간을 전화·카톡으로 문의합니다."),
+        ("배정·도착 안내", "가능한 관리사와 방문 예상 시간을 안내해 드립니다."),
+        ("방문·코스 진행", "지정한 자택·오피스텔·숙소로 관리사가 방문해 코스를 진행합니다."),
+        ("이용 후 결제", "후불제로 진행되며, 결제 방법은 상담 시 안내합니다."),
+    ]
+    items = "".join(
+        f"""
+      <li class="process-step">
+        <span class="process-step-num">{i:02d}</span>
+        <div>
+          <strong>{esc(title)}</strong>
+          <p class="muted">{esc(body)}</p>
+        </div>
+      </li>"""
+        for i, (title, body) in enumerate(steps, 1)
+    )
+    return f"""
+<section id="process" class="area-process">
+  <div class="container">
+    <h2>📋 {esc(region_label)} 출장마사지 이용 절차</h2>
+    <ol class="process-steps">{items}
+    </ol>
+  </div>
+</section>"""
+
+
+def service_tips_html(region_label: str, tips: list[tuple[str, str]]) -> str:
+    cards = "".join(
+        f"""
+      <div class="tip-card">
+        <h3>{esc(title)}</h3>
+        <p class="muted">{esc(body)}</p>
+      </div>"""
+        for title, body in tips
+    )
+    return f"""
+<section id="tips" class="area-tips">
+  <div class="container">
+    <h2>💡 {esc(region_label)} 이용 전 알아두면 좋은 점</h2>
+    <div class="tip-grid">{cards}
+    </div>
+  </div>
+</section>"""
+
+
+def local_notes_html(region_label: str, notes: list[tuple[str, str]]) -> str:
+    blocks = "".join(
+        f"""
+      <article class="local-note">
+        <h3>{esc(title)}</h3>
+        <p class="muted">{esc(body)}</p>
+      </article>"""
+        for title, body in notes
+    )
+    return f"""
+<section id="notes" class="area-notes">
+  <div class="container">
+    <h2>📝 {esc(region_label)} 지역 이용 팁</h2>
+    <div class="local-notes-grid">{blocks}
+    </div>
+  </div>
+</section>"""
+
+
+def area_nav_links(page_type: str) -> list[tuple[str, str]]:
+    if page_type == "aggregation":
+        return [
+            ("#shops", "업체"),
+            ("#price", "요금"),
+            ("#local", "지역"),
+            ("#faq", "FAQ"),
+            ("blog.html", "블로그"),
+            ("#contact", "문의"),
+        ]
+    if page_type == "service-guide":
+        return [
+            ("#local", "지역안내"),
+            ("#process", "이용절차"),
+            ("#faq", "FAQ"),
+            ("#shops", "업체"),
+            ("#price", "요금"),
+            ("blog.html", "블로그"),
+            ("#contact", "문의"),
+        ]
+    return [
+        ("#shops", "업체"),
+        ("#price", "요금"),
+        ("#local", "지역안내"),
+        ("#area", "주변지역"),
+        ("#faq", "FAQ"),
+        ("blog.html", "블로그"),
+        ("#contact", "문의"),
+    ]
 
 
 def region_selector_html(metro_id: str = "", slug: str = "") -> str:
@@ -564,6 +721,8 @@ def shop_section_html(
     *,
     capital_only: bool = False,
     section_note: str = "",
+    page_type: str = "default",
+    extra_head_html: str = "",
 ) -> str:
     cards_html, shop_count = render_shop_cards_grid(
         region,
@@ -574,27 +733,183 @@ def shop_section_html(
     count_text = f"{shop_count}개 업체"
     title = cards_title or f"{esc(region_label)} 출장마사지 업체"
     capital_attr = ' data-capital-only="true"' if capital_only else ""
-    note_html = f'<p class="muted">{esc(section_note)}</p>' if section_note else (
-        '<p class="muted">카드를 클릭하면 코스·가격·리뷰 등 상세 정보를 확인할 수 있습니다.</p>'
-    )
+    section_mod = ""
+    if page_type == "aggregation":
+        section_mod = " shop-cards-section--aggregation"
+    elif page_type == "service-guide":
+        section_mod = " shop-cards-section--guide"
+    if not section_note:
+        if page_type == "aggregation":
+            section_note = "가격·코스·평점을 비교하고 카드를 클릭하면 상세 페이지로 이동합니다."
+        elif page_type == "service-guide":
+            section_note = "위 안내를 확인하신 뒤, 아래에서 원하는 업체를 선택하세요."
+        else:
+            section_note = "카드를 클릭하면 코스·가격·리뷰 등 상세 정보를 확인할 수 있습니다."
+    note_html = f'<p class="muted">{esc(section_note)}</p>'
     return f"""
-<section id="shops" class="shop-cards-section"
+<section id="shops" class="shop-cards-section{section_mod}"
   data-region="{esc(region)}"
   data-district="{esc(district)}"
   data-region-label="{esc(region_label)}"
   data-metro="{esc(metro_id)}"
-  data-slug="{esc(slug if slug else "")}"{capital_attr}>
+  data-slug="{esc(slug if slug else "")}"
+  data-page-type="{esc(page_type)}"{capital_attr}>
   <div class="container">
     <div class="shop-cards-head">
       <h2 id="shopCardsTitle">{title}</h2>
       <span id="shopCardsCount" class="shop-cards-count">{count_text}</span>
     </div>
+    {extra_head_html}
     {note_html}
     <div id="shopCardsGrid" class="shop-cards-grid" aria-live="polite">
 {cards_html}
     </div>
   </div>
 </section>"""
+
+
+def build_area_main_sections(
+    site: dict,
+    pricing: dict,
+    metro: dict,
+    area: dict,
+    *,
+    region_label: str,
+    short: str,
+    dong_list: str,
+    slug: str,
+    h1: str,
+    page_type: str,
+    area_content: AreaContent,
+    breadcrumb: str,
+    sub_links_html: str,
+    back_link: str,
+    sibling_html: str,
+    map_query: str,
+) -> str:
+    shops = shop_section_html(
+        region_label,
+        metro["name"],
+        short,
+        metro["id"],
+        slug,
+        page_type=page_type,
+        extra_head_html=aggregation_toolbar_html() if page_type == "aggregation" else "",
+    )
+    hero = hero_split_html(
+        site,
+        h1,
+        f"{dong_list} 등 {esc(region_label)} · 업체 카드에서 코스·가격 확인",
+        tags=(
+            ["가격 비교", "업체 필터", "24시간 상담"]
+            if page_type == "aggregation"
+            else ["이용 안내", "후불제", "24시간 상담"]
+        ),
+        image_alt=f"{region_label} 출장마사지",
+        compact=page_type == "aggregation",
+    )
+    price = f"""
+<section id="price">
+  <div class="container">
+    {breadcrumb}
+    <h2>{esc(region_label)} 코스별 참고 요금</h2>
+    <p class="muted">업체·코스에 따라 금액이 다를 수 있습니다. 상담 시 최종 안내해 드립니다.</p>
+    {pricing_cards(pricing, region_label)}
+  </div>
+</section>"""
+    local_sec = local_highlight_html(region_label, area_content)
+    why_sec = why_section_html(region_label, dong_list, area_content, slug)
+    process_sec = process_section_html(region_label) if page_type == "service-guide" else ""
+    tips_sec = (
+        service_tips_html(region_label, area_content.service_tips)
+        if area_content.service_tips
+        else ""
+    )
+    notes_sec = (
+        local_notes_html(region_label, area_content.local_notes)
+        if area_content.local_notes
+        else ""
+    )
+    area_sec = f"""
+<section id="area">
+  <div class="container">
+    <h2>📍 {esc(region_label)} 출장마사지 가능 지역</h2>
+    <div class="card">
+      <p><strong>{esc(area["name"])} 전지역</strong> 방문 가능합니다. ({dong_list} 등)</p>
+      {sub_links_html}
+      <ul class="region-list">
+        {back_link}
+        {sibling_html}
+        <li><a href="index.html">전국 출장마사지 메인으로</a></li>
+      </ul>
+    </div>
+  </div>
+</section>"""
+    faq_sec = f"""
+<section id="faq">
+  <div class="container">
+    <h2>❓ {esc(region_label)} FAQ</h2>
+    <div class="card">
+      {faq_html(region_label, dong_list, area_content)}
+    </div>
+  </div>
+</section>"""
+    map_sec = f"""
+<section id="map">
+  <div class="container">
+    <h2>🗺️ {esc(region_label)} 지도</h2>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="map-wrap">
+        <iframe src="https://www.google.com/maps?q={esc(map_query)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen title="{esc(region_label)} 지도"></iframe>
+      </div>
+    </div>
+  </div>
+</section>"""
+    contact_sec = f"""
+<section id="contact" class="contact-strip">
+  <div class="container contact-strip-inner">
+    <div class="contact-strip-info">
+      <h2>{esc(region_label)} 상담</h2>
+      <p class="muted" style="margin:0;">"{esc(short)} + 코스/시간"을 알려주시면 빠르게 안내합니다.</p>
+    </div>
+    <div class="contact-strip-actions">
+      <a href="tel:{site["phoneTel"]}" class="cta-btn">📞 {site["phone"]}</a>
+      <a href="{site["kakao"]}" class="cta-btn-outline" rel="noopener noreferrer">카카오톡</a>
+    </div>
+  </div>
+</section>"""
+
+    if page_type == "aggregation":
+        return f"""{shops}
+{hero}
+{price}
+{local_sec}
+{area_sec}
+{faq_sec}
+{map_sec}
+{contact_sec}"""
+    if page_type == "service-guide":
+        return f"""{hero}
+{local_sec}
+{why_sec}
+{process_sec}
+{tips_sec}
+{notes_sec}
+{faq_sec}
+{price}
+{shops}
+{area_sec}
+{map_sec}
+{contact_sec}"""
+    return f"""{shops}
+{hero}
+{price}
+{local_sec}
+{why_sec}
+{area_sec}
+{faq_sec}
+{map_sec}
+{contact_sec}"""
 
 
 def render_area_page(
@@ -614,13 +929,23 @@ def render_area_page(
     metro_name = metro["name"]
     dong_list = "·".join(area.get("dong", [])[:6])
     region_label = f"{metro_name} {short}"
-    page_title = area_page_title(metro_name, short, dup_shorts, site["name"])
-    h1 = f"{region_label} 출장마사지 — 업체·코스 비교"
+    page_type, theme = resolve_area_layout(area, metro, parent_area)
+    if page_type == "aggregation":
+        page_title = f"{area_title_label(metro_name, short, dup_shorts)} 출장마사지｜업체·가격 비교 - {site['name']}"
+        h1 = f"{region_label} 출장마사지 — 업체·가격 비교"
+    elif page_type == "service-guide":
+        page_title = f"{area_title_label(metro_name, short, dup_shorts)} 출장마사지｜이용안내·예약 - {site['name']}"
+        h1 = f"{region_label} 출장마사지 — 이용안내·예약"
+    else:
+        page_title = area_page_title(metro_name, short, dup_shorts, site["name"])
+        h1 = f"{region_label} 출장마사지 — 업체·코스 비교"
     canonical = f"{site['domain']}/{slug}.html"
     map_query = f"{metro_name} {area['name']}"
     price_prefix = short
     meta_desc = f"{region_label} 출장마사지 24시간 운영. {dong_list} 등 전지역 방문. 후불제, 전문 테라피스트 배정."
-    area_content = get_area_content(slug, metro, area, region_label, dong_list)
+    area_content = get_area_content(
+        slug, metro, area, region_label, dong_list, page_type=page_type
+    )
     if area_content.highlights:
         meta_desc = area_content.highlights[0][:120] + (
             "…" if len(area_content.highlights[0]) > 120 else ""
@@ -660,15 +985,16 @@ def render_area_page(
   <title>{esc(page_title)}</title>
   <meta name="description" content="{esc(meta_desc)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
-  <meta name="theme-color" content="#0c1222">
+  <meta name="theme-color" content="{theme_meta_color(theme)}">
   <link rel="canonical" href="{canonical}">
 {og_head_tags(site, page_title, og_desc, canonical)}
   <link rel="stylesheet" href="css/common.css">
   {SHOP_CSS}
   {REGION_CSS}
+{theme_css_link(theme)}
 {seo_schema_block(site, canonical=canonical, region_label=region_label, page_region=metro_name, page_district=short, item_list_name=item_list_name, local_desc=meta_desc, faq_ld=faq_json_ld(region_label, dong_list, area_content), area_content=area_content, breadcrumb_ld=breadcrumb_ld)}
 </head>
-<body>
+<body data-page-type="{esc(page_type)}" data-theme="{esc(theme)}">
 {site_top_open()}
 <header>
   <div class="container">
@@ -681,76 +1007,30 @@ def render_area_page(
         <a href="tel:{site["phoneTel"]}" class="cta">전화문의</a>
       </div>
     </div>
-    {site_nav_html([
-      ("#shops", "업체"),
-      ("#price", "요금"),
-      ("#local", "지역안내"),
-      ("#area", "주변지역"),
-      ("#faq", "FAQ"),
-      ("blog.html", "블로그"),
-      ("#contact", "문의"),
-    ])}
+    {site_nav_html(area_nav_links(page_type))}
   </div>
 </header>
 {region_selector_html(metro["id"], slug)}
 {site_top_close()}
 <main>
-{shop_section_html(region_label, metro_name, short, metro["id"], slug)}
-{hero_split_html(site, h1, f"{dong_list} 등 {esc(region_label)} · 업체 카드에서 코스·가격 확인", tags=["업체 비교", "구·동 맞춤", "24시간 상담"], image_alt=f"{region_label} 출장마사지")}
-<section id="price">
-  <div class="container">
-    {breadcrumb}
-    <h2>{esc(region_label)} 코스별 참고 요금</h2>
-    <p class="muted">업체·코스에 따라 금액이 다를 수 있습니다. 상담 시 최종 안내해 드립니다.</p>
-    {pricing_cards(pricing, region_label)}
-  </div>
-</section>
-{local_highlight_html(region_label, area_content)}
-{why_section_html(region_label, dong_list, area_content, slug)}
-<section id="area">
-  <div class="container">
-    <h2>📍 {esc(region_label)} 출장마사지 가능 지역</h2>
-    <div class="card">
-      <p><strong>{esc(area["name"])} 전지역</strong> 방문 가능합니다. ({dong_list} 등)</p>
-      {sub_links_html}
-      <ul class="region-list">
-        {back_link}
-        {sibling_html}
-        <li><a href="index.html">전국 출장마사지 메인으로</a></li>
-      </ul>
-    </div>
-  </div>
-</section>
-<section id="faq">
-  <div class="container">
-    <h2>❓ {esc(region_label)} FAQ</h2>
-    <div class="card">
-      {faq_html(region_label, dong_list, area_content)}
-    </div>
-  </div>
-</section>
-<section id="map">
-  <div class="container">
-    <h2>🗺️ {esc(region_label)} 지도</h2>
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div class="map-wrap">
-        <iframe src="https://www.google.com/maps?q={esc(map_query)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen title="{esc(region_label)} 지도"></iframe>
-      </div>
-    </div>
-  </div>
-</section>
-<section id="contact" class="contact-strip">
-  <div class="container contact-strip-inner">
-    <div class="contact-strip-info">
-      <h2>{esc(region_label)} 상담</h2>
-      <p class="muted" style="margin:0;">"{esc(short)} + 코스/시간"을 알려주시면 빠르게 안내합니다.</p>
-    </div>
-    <div class="contact-strip-actions">
-      <a href="tel:{site["phoneTel"]}" class="cta-btn">📞 {site["phone"]}</a>
-      <a href="{site["kakao"]}" class="cta-btn-outline" rel="noopener noreferrer">카카오톡</a>
-    </div>
-  </div>
-</section>
+{build_area_main_sections(
+    site,
+    pricing,
+    metro,
+    area,
+    region_label=region_label,
+    short=short,
+    dong_list=dong_list,
+    slug=slug,
+    h1=h1,
+    page_type=page_type,
+    area_content=area_content,
+    breadcrumb=breadcrumb,
+    sub_links_html=sub_links_html,
+    back_link=back_link,
+    sibling_html=sibling_html,
+    map_query=map_query,
+)}
 </main>
 <footer>
   <div class="container">
@@ -765,6 +1045,7 @@ def render_area_page(
 </div>
 <script src="js/common.js"></script>
 {SHOP_SCRIPTS}
+{AREA_PAGE_SCRIPT if page_type == "aggregation" else ""}
 </body>
 </html>
 """

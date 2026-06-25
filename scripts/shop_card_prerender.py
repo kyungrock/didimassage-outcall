@@ -256,6 +256,12 @@ def card_image_alt(shop: dict, display_label: str = "") -> str:
     return f"{prefix} 출장마사지 {name} - 24시간 후불, {price}"
 
 
+def parse_price_min(price_str: str) -> int:
+    raw = (price_str or "").split("~")[0]
+    digits = re.sub(r"[^\d]", "", raw)
+    return int(digits) if digits else 999999
+
+
 def render_shop_card_html(shop: dict, display_label: str = "") -> str:
     name = shop.get("name", "")
     href = esc(build_detail_url(shop))
@@ -264,6 +270,7 @@ def render_shop_card_html(shop: dict, display_label: str = "") -> str:
     rating = shop.get("rating", "-")
     stars = render_stars(rating)
     price = esc(shop.get("price") or "상담")
+    price_min = parse_price_min(shop.get("price") or "")
     location = esc(format_shop_location(shop, display_label))
 
     greeting_html = ""
@@ -280,7 +287,7 @@ def render_shop_card_html(shop: dict, display_label: str = "") -> str:
         )
         tags_html = f'\n      <div class="shop-card-tags">{tag_items}</div>'
 
-    return f"""    <a class="shop-card" href="{href}" aria-label="{esc(name)} 상세보기">
+    return f"""    <a class="shop-card" href="{href}" aria-label="{esc(name)} 상세보기" data-price-min="{price_min}">
       <div class="shop-card-image-wrap">
         <img class="shop-card-image" src="{img}" alt="{alt}" loading="lazy" decoding="async">
         <span class="shop-card-badge">출장마사지</span>

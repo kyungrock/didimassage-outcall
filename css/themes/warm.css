@@ -1,0 +1,55 @@
+/* 파주 등 서비스설명형 — 따뜻·친근 */
+body[data-theme="warm"] {
+  --bg: #faf6f1;
+  --surface: #fffaf5;
+  --text: #3d2f28;
+  --card: #ffffff;
+  --brand: #c2703e;
+  --brand-hover: #a85d32;
+  --accent: #6b8f71;
+  --accent-soft: rgba(107, 143, 113, 0.14);
+  --muted: rgba(61, 47, 40, 0.68);
+  --border: rgba(61, 47, 40, 0.12);
+  --radius: 18px;
+  --radius-lg: 24px;
+  --hero-grad: linear-gradient(145deg, #f5ebe0 0%, #faf6f1 45%, #eef4ea 100%);
+}
+
+body[data-theme="warm"] header {
+  box-shadow: 0 1px 0 var(--border);
+}
+
+body[data-theme="warm"] .card,
+body[data-theme="warm"] .shop-card,
+body[data-theme="warm"] .rate-card {
+  box-shadow: 0 4px 20px rgba(61, 47, 40, 0.06);
+}
+
+body[data-theme="warm"] .hero-art {
+  background: linear-gradient(135deg, #e8d5c4 0%, #d4e4d0 100%) !important;
+}
+
+body[data-theme="warm"] .cta-btn {
+  background: var(--brand);
+  color: #fff;
+}
+
+body[data-theme="warm"] .cta-btn-outline {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+body[data-theme="warm"] .shop-cards-section--guide {
+  background: #f3ebe3;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+body[data-theme="warm"] .process-step {
+  background: var(--card);
+}
+
+body[data-theme="warm"] .tip-card,
+body[data-theme="warm"] .local-note {
+  background: var(--card);
+}

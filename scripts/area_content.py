@@ -15,6 +15,8 @@ class AreaContent:
     address_locality: str
     street_address: str
     course_prefix: str
+    service_tips: list[tuple[str, str]] | None = None
+    local_notes: list[tuple[str, str]] | None = None
 
 
 # 구·시 대표 우편번호 (서비스 지역 기준)
@@ -180,6 +182,11 @@ HIGHLIGHTS: dict[str, list[str]] = {
         "제주시 연동·노형·이도·애월 등 관광·주거 혼합 지역에 맞춰 호텔·펜션·자택으로 방문합니다.",
         "제주공항 인근 숙박시설과 연동 먹자골목 주변 호텔에서 여행 중 출장 문의가 많습니다.",
     ],
+    "gyeonggi-paju": [
+        "파주는 운정·교하 신도시와 금촌·문산 기존 생활권이 나뉘어 있어, 동네별 이동 시간 차이가 큽니다. 상담 시 운정·금촌·교하·문산 중 어디인지 알려주시면 배정과 도착 예상 시간을 맞춰 안내합니다.",
+        "자택·오피스텔·숙박시설 모두 방문 가능하며, 경기 북부 특성상 저녁·주말 당일 예약 문의가 많습니다. 코스·시간은 전화·카톡으로 조율하세요.",
+        "운정신도시·금촌역·교하·문산 일대는 업체마다 커버 범위가 다를 수 있으니, 아래 안내를 읽은 뒤 업체를 고르시면 더 수월합니다.",
+    ],
 }
 
 STREET_HINTS: dict[str, str] = {
@@ -324,12 +331,118 @@ def why_bodies(
     return bodies[idx][:count]
 
 
+SERVICE_TIPS: dict[str, list[tuple[str, str]]] = {
+    "gyeonggi-paju": [
+        (
+            "운정·교하 신도시",
+            "아파트 단지·오피스텔이 많아 주차·동호수 안내가 중요합니다. 예약 시 동·호수 대략 위치를 알려주시면 관리사 동선을 줄일 수 있습니다.",
+        ),
+        (
+            "금촌·문산 생활권",
+            "기존 도심과 신도시 사이 이동이 있어, 금촌역·문산 방향은 상담 시 ‘어느 쪽 생활권인지’를 먼저 말씀해 주세요.",
+        ),
+        (
+            "당일 예약 팁",
+            "평일 저녁·주말 오후는 배정이 빠르게 차는 편입니다. 원하는 시간이 있으면 가능한 한 일찍 전화·카톡으로 문의하세요.",
+        ),
+    ],
+}
+
+LOCAL_NOTES: dict[str, list[tuple[str, str]]] = {
+    "gyeonggi-paju": [
+        (
+            "운정 신도시 이용",
+            "운정 호수공원·롯데몰 인근 아파트에서 퇴근 후 당일 예약 문의가 많습니다. 주차 가능 여부를 미리 알려주시면 원활합니다.",
+        ),
+        (
+            "금촌·교하 출장",
+            "금촌역 주변 오피스·자택과 교하 신도시 오피스텔 모두 방문 가능합니다. 코스는 바디 릴렉스부터 스웨디시까지 상담으로 맞춥니다.",
+        ),
+    ],
+    "seoul-gangnam": [
+        (
+            "테헤란로·삼성동",
+            "호텔·오피스텔 밀집 지역은 야근 후 늦은 시간 문의가 많습니다. 카드에서 가격·코스를 비교한 뒤 바로 상담하세요.",
+        ),
+        (
+            "역삼·논현·청담",
+            "비즈니스·주거 혼합 지역이라 당일 배정이 빠른 편입니다. 원하는 코스명을 함께 알려주시면 안내가 수월합니다.",
+        ),
+    ],
+}
+
+
+def _auto_service_tips(
+    metro: dict, area: dict, slug: str, region_label: str
+) -> list[tuple[str, str]]:
+    short = area.get("short", area["name"])
+    d1, d2, d3 = _dong_pair(area)
+    metro_name = metro["name"]
+    return [
+        (
+            f"{d1}·{d2} 생활권",
+            f"{metro_name} {short} {d1}·{d2} 일대 자택·오피스텔·숙박시설 방문이 가능합니다. 예약 시 동·건물 위치를 알려주시면 방문 시간 안내가 수월합니다.",
+        ),
+        (
+            "당일·야간 예약",
+            f"{region_label}는 평일 저녁·주말에 당일 문의가 많습니다. 원하는 시간이 있으면 가능한 한 일찍 전화·카톡으로 문의하세요.",
+        ),
+        (
+            f"{d3}·{short} 방문 안내",
+            f"{d3} 포함 {short} 전역 상담이 가능합니다. 업체마다 커버 범위가 다를 수 있어 카드·상담으로 최종 확인하세요.",
+        ),
+    ]
+
+
+def _auto_local_notes(
+    metro: dict, area: dict, slug: str, region_label: str
+) -> list[tuple[str, str]]:
+    short = area.get("short", area["name"])
+    d1, d2, _ = _dong_pair(area)
+    idx = _slug_hash(slug + "note") % 3
+    pools = [
+        [
+            (
+                f"{d1} 인근 이용",
+                f"{d1} 주거·상권 인근에서 출장마사지 문의가 많습니다. 주차·동호수 안내를 함께 알려주시면 원활합니다.",
+            ),
+            (
+                f"{d2}·{short} 출장",
+                f"{d2} 일대 오피스텔·자택 모두 방문 가능합니다. 코스는 바디 릴렉스부터 스웨디시·시그니처까지 상담으로 맞춥니다.",
+            ),
+        ],
+        [
+            (
+                f"{short} 호텔·숙박",
+                f"{region_label} 호텔·펜션·게스트하우스 이용 고객 문의가 이어집니다. 체크인 장소를 미리 알려주세요.",
+            ),
+            (
+                f"{d1}·{d2} 생활권",
+                f"{d1}·{d2} 중심 생활권은 배정 동선을 나눠 안내합니다. 급한 일정은 전화 상담을 권장합니다.",
+            ),
+        ],
+        [
+            (
+                f"{short} 첫 이용",
+                f"{region_label} 첫 이용이시라면 아래 FAQ와 이용 절차를 먼저 확인한 뒤 업체를 고르시면 편합니다.",
+            ),
+            (
+                f"{d2} 당일 예약",
+                f"{d2} 인근은 퇴근 시간대 문의가 집중됩니다. 코스명과 희망 시간을 함께 알려주세요.",
+            ),
+        ],
+    ]
+    return pools[idx]
+
+
 def get_area_content(
     slug: str,
     metro: dict,
     area: dict,
     region_label: str,
     dong_list: str = "",
+    *,
+    page_type: str = "default",
 ) -> AreaContent:
     short = area.get("short", area["name"])
     name = area["name"]
@@ -355,6 +468,25 @@ def get_area_content(
     )
 
     titles = _why_titles(short, region_label, slug)
+    pinned_why = {
+        "gyeonggi-paju": [
+            f"1) {short} 자택·오피스텔로 찾아오는 방문형 출장",
+            f"2) 운정·금촌·교하·문산 생활권 맞춤 상담",
+            f"3) {region_label} 후불제 — 이용 후 결제",
+            f"4) {short} 피로·컨디션별 코스 추천",
+        ],
+    }
+    if slug in pinned_why:
+        titles = pinned_why[slug]
+
+    tips = SERVICE_TIPS.get(slug)
+    notes = LOCAL_NOTES.get(slug)
+    if page_type == "service-guide":
+        if not tips:
+            tips = _auto_service_tips(metro, area, slug, region_label)
+        if not notes:
+            notes = _auto_local_notes(metro, area, slug, region_label)
+
     return AreaContent(
         highlights=_build_highlights(metro, area, slug),
         why_titles=titles,
@@ -362,6 +494,8 @@ def get_area_content(
         address_locality=locality,
         street_address=street,
         course_prefix=short,
+        service_tips=tips,
+        local_notes=notes,
     )
 
 

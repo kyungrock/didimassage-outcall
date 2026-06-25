@@ -776,6 +776,118 @@ footer {
   text-decoration: none;
 }
 
+/* ── 지역 페이지 레이아웃 (aggregation / service-guide) ── */
+.shop-agg-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.shop-agg-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.shop-agg-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.shop-agg-btn.is-active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #041018;
+  font-weight: 700;
+}
+
+.hero-split--compact {
+  padding: 32px 0;
+}
+
+.hero-split--compact h1 {
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+}
+
+.area-process {
+  padding: 40px 0;
+}
+
+ol.process-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.process-step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.process-step-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--brand);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.process-step p {
+  margin: 4px 0 0;
+}
+
+.tip-grid,
+.local-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.tip-card,
+.local-note {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.tip-card h3,
+.local-note h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.area-tips,
+.area-notes {
+  padding: 36px 0;
+}
+
 @media (max-width: 900px) {
   .hero-split-inner {
     grid-template-columns: 1fr;
