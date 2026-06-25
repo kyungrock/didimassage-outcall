@@ -770,7 +770,7 @@ def render_metro_hub(site: dict, metro: dict) -> str:
 
 def render_index(site: dict, metros: list) -> str:
     canonical = f"{site['domain']}/"
-    page_title = f"전국 출장마사지｜시·구별 24시 후불 - {site['name']}"
+    page_title = "서울·경기·인천 출장마사지｜20대, 30대 - 24시 출장안마"
     meta_desc = "서울·경기·인천·부산·대구·대전·광주·울산 시·구별 출장마사지. 24시간 후불제, 전지역 방문, 전화/카톡 즉시 상담."
     return f"""<!doctype html>
 <html lang="ko">
