@@ -1077,8 +1077,8 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
 {region_selector_html("", "")}
 {site_top_close()}
 <main>
-{hero}
 {shop_section_html("수도권", "", "", "", "", cards_title="수도권 출장마사지 업체", capital_only=True, section_note="서울·경기·인천 수도권 업체만 표시합니다. 전국 다른 지역은 아래 전국 안내에서 확인하세요.")}
+{hero}
 {nationwide}
 {sudo_seo}
 <section id="blog-link">
