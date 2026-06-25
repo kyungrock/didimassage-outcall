@@ -523,11 +523,15 @@ p {
   background: var(--brand);
 }
 
-.rate-card--b::before {
+.rate-card--light::before {
+  background: var(--brand);
+}
+
+.rate-card--standard::before {
   background: var(--accent);
 }
 
-.rate-card--c::before {
+.rate-card--signature::before {
   background: linear-gradient(90deg, var(--brand), var(--accent));
 }
 

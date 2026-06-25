@@ -2,7 +2,7 @@
   "use strict";
 
   function resolveImage(src) {
-    if (!src) return "img/model-1.png";
+    if (!src) return "img/hero-brand.svg";
     if (/^https?:\/\/msg1000\.com\/images\//i.test(src)) {
       src = src.replace(/^https?:\/\/msg1000\.com\//i, "");
     }

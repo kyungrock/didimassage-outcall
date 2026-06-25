@@ -123,6 +123,18 @@
     return "shop-detail.html?" + params.toString();
   }
 
+  function cleanLocationPart(value) {
+    return (value || "")
+      .split("·")
+      .map(function (p) {
+        return p.trim();
+      })
+      .filter(function (p) {
+        return p && p !== "불가" && p !== "관리";
+      })
+      .join(" · ");
+  }
+
   function formatShopLocation(shop, displayLabel) {
     const shopDistrict = shop.district || "";
     if (
@@ -131,9 +143,11 @@
     ) {
       return displayLabel + " 출장 가능";
     }
-    let location = shop.region || "";
-    if (shopDistrict) location += " · " + shopDistrict;
-    if (shop.dong) location += " · " + shop.dong;
+    let location = cleanLocationPart(shop.region);
+    const district = cleanLocationPart(shopDistrict);
+    const dong = cleanLocationPart(shop.dong);
+    if (district) location += " · " + district;
+    if (dong) location += " · " + dong;
     return location;
   }
 

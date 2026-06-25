@@ -229,9 +229,14 @@ def format_shop_location(shop: dict, display_label: str = "") -> str:
         "전지역" in shop_district or not shop_district.strip()
     ):
         return f"{display_label} 출장 가능"
-    region = shop.get("region") or ""
-    district = shop_district
-    dong = shop.get("dong") or ""
+
+    def clean_part(value: str) -> str:
+        parts = [p.strip() for p in (value or "").split("·")]
+        return " · ".join(p for p in parts if p and p not in ("불가", "관리"))
+
+    region = clean_part(shop.get("region") or "")
+    district = clean_part(shop_district)
+    dong = clean_part(shop.get("dong") or "")
     location = region
     if district:
         location += f" · {district}"

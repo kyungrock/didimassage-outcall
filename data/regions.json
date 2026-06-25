@@ -11,6 +11,7 @@
     "kakao": "https://open.kakao.com/o/g3bQO6zi",
     "heroImage": "/img/hero-brand.svg",
     "heroStyle": "brand",
+    "ogImage": "/img/hero-brand-og.png",
     "kakaoIcon": "/img/kakao-icon.png"
   },
   "pricing": {

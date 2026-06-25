@@ -142,14 +142,14 @@ def area_title_label(metro_name: str, short: str, dup_shorts: set[str]) -> str:
 
 
 def metro_page_title(metro_name: str, site_name: str) -> str:
-    return f"{metro_name} 출장마사지｜시·구 전지역 24시 - {site_name}"
+    return f"{metro_name} 출장마사지｜구·시별 업체 비교 - {site_name}"
 
 
 def area_page_title(
     metro_name: str, short: str, dup_shorts: set[str], site_name: str
 ) -> str:
     label = area_title_label(metro_name, short, dup_shorts)
-    return f"{label} 출장마사지｜24시 후불 - {site_name}"
+    return f"{label} 출장마사지｜업체·코스 비교 - {site_name}"
 
 
 def schema_telephone(phone: str) -> str:
@@ -170,6 +170,7 @@ def seo_schema_block(
     faq_ld: str | None = None,
     area_content: AreaContent | None = None,
     breadcrumb_ld: str | None = None,
+    capital_only: bool = False,
 ) -> str:
     address = None
     if area_content:
@@ -193,6 +194,7 @@ def seo_schema_block(
             page_region=page_region,
             page_district=page_district,
             list_name=item_list_name,
+            capital_only=capital_only,
         ),
     ]
     if breadcrumb_ld:
@@ -284,9 +286,10 @@ def pricing_cards(pricing: dict, prefix: str) -> str:
         desc_html = (
             f'<p class="rate-card-desc">{esc(desc)}</p>' if desc else ""
         )
+        tier_slug = {"A": "light", "B": "standard", "C": "signature"}[key]
         cards.append(
             f"""
-    <article class="rate-card rate-card--{key.lower()}">
+    <article class="rate-card rate-card--{tier_slug}">
       <div class="rate-card-label">{esc(tier)}</div>
       <h3>{esc(course["name"])}</h3>
       {desc_html}
@@ -565,7 +568,7 @@ def shop_section_html(
     cards_html, shop_count = render_shop_cards_grid(
         region,
         district,
-        display_label=region_label if district else "",
+        display_label=region_label if (district or capital_only) else "",
         capital_only=capital_only,
     )
     count_text = f"{shop_count}개 업체"
@@ -612,7 +615,7 @@ def render_area_page(
     dong_list = "·".join(area.get("dong", [])[:6])
     region_label = f"{metro_name} {short}"
     page_title = area_page_title(metro_name, short, dup_shorts, site["name"])
-    h1 = f"{region_label} 출장마사지 24시간 후불"
+    h1 = f"{region_label} 출장마사지 — 업체·코스 비교"
     canonical = f"{site['domain']}/{slug}.html"
     map_query = f"{metro_name} {area['name']}"
     price_prefix = short
@@ -693,7 +696,7 @@ def render_area_page(
 {site_top_close()}
 <main>
 {shop_section_html(region_label, metro_name, short, metro["id"], slug)}
-{hero_split_html(site, h1, f"{dong_list} 등 {esc(region_label)} 전지역 · 자택·호텔·오피스텔 방문", tags=["24시간", "후불제", "구·동 맞춤"], image_alt=f"{region_label} 출장마사지")}
+{hero_split_html(site, h1, f"{dong_list} 등 {esc(region_label)} · 업체 카드에서 코스·가격 확인", tags=["업체 비교", "구·동 맞춤", "24시간 상담"], image_alt=f"{region_label} 출장마사지")}
 <section id="price">
   <div class="container">
     {breadcrumb}
@@ -772,7 +775,7 @@ def render_metro_hub(site: dict, metro: dict) -> str:
     metro_name = metro["name"]
     canonical = f"{site['domain']}/{metro['id']}.html"
     page_title = metro_page_title(metro_name, site["name"])
-    meta_desc = f"{metro_name} 출장마사지. {len(metro['areas'])}개 지역 전지역 방문, 24시간 후불제."
+    meta_desc = f"{metro_name} 출장마사지. {len(metro['areas'])}개 구·시별 업체 카드·코스·가격 비교."
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -1026,6 +1029,7 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
             ("#process", "이용절차"),
             ("#nationwide", "전국"),
             ("#rates", "요금"),
+            ("#faq", "FAQ"),
             ("blog.html", "블로그"),
             ("#contact", "문의"),
         ]
@@ -1048,11 +1052,11 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="theme-color" content="#0c1222">
   <link rel="canonical" href="{canonical}">
-{og_head_tags(site, page_title, meta_desc, canonical)}
+{og_head_tags(site, page_title, meta_desc, canonical, image=site.get("ogImage"))}
   <link rel="stylesheet" href="css/common.css">
   {SHOP_CSS}
   {REGION_CSS}
-{seo_schema_block(site, canonical=canonical, region_label="서울·경기·인천", page_region="수도권", item_list_name="수도권 출장마사지 업체", local_desc=meta_desc, faq_ld=faq_ld)}
+{seo_schema_block(site, canonical=canonical, region_label="서울·경기·인천", page_region="", item_list_name="수도권 출장마사지 업체", local_desc=meta_desc, faq_ld=faq_ld, capital_only=True)}
 </head>
 <body>
 {site_top_open()}
@@ -1073,8 +1077,8 @@ def render_index(site: dict, metros: list, pricing: dict) -> str:
 {region_selector_html("", "")}
 {site_top_close()}
 <main>
-{shop_section_html("수도권", "", "", "", "", cards_title="수도권 출장마사지 업체", capital_only=True, section_note="서울·경기·인천 수도권 업체만 표시합니다. 전국 다른 지역은 아래 전국 안내에서 확인하세요.")}
 {hero}
+{shop_section_html("수도권", "", "", "", "", cards_title="수도권 출장마사지 업체", capital_only=True, section_note="서울·경기·인천 수도권 업체만 표시합니다. 전국 다른 지역은 아래 전국 안내에서 확인하세요.")}
 {nationwide}
 {sudo_seo}
 <section id="blog-link">

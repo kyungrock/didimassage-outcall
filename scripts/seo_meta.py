@@ -42,7 +42,7 @@ def og_head_tags(
     image: str | None = None,
     og_type: str = "website",
 ) -> str:
-    img = image or site.get("heroImage", "/img/hero-brand.svg")
+    img = image or site.get("ogImage") or site.get("heroImage", "/img/hero-brand.svg")
     if img.startswith("/"):
         img = site["domain"] + img
     name = esc_attr(site["name"])
@@ -114,9 +114,15 @@ def json_ld_item_list(
     page_district: str = "",
     list_name: str = "",
     limit: int = 30,
+    *,
+    capital_only: bool = False,
 ) -> str:
     cards = load_shop_cards()
-    shops = dedupe_shops(filter_shops(cards, page_region, page_district))
+    shops = dedupe_shops(
+        filter_shops(
+            cards, page_region, page_district, capital_only=capital_only
+        )
+    )
     elements = []
     for i, shop in enumerate(shops[:limit], start=1):
         detail = abs_url(site["domain"], build_detail_url(shop))
